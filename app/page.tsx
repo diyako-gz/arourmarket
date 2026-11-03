@@ -1,1666 +1,1639 @@
+
 // "use client";
 
-// import { useMemo, useState, useEffect, useRef } from "react";
-// import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-// import { ArrowLeft, Menu as MenuIcon, X, Phone, ArrowUp } from "lucide-react";
+// import { useEffect, useMemo, useState } from "react";
+// import type { ReactNode } from "react";
+// import {
+//   ArrowUp,
+//   Bookmark,
+//   Clock3,
+//   ChevronLeft,
+//   Coffee,
+//   Grid2X2,
+//   Heart,
+//   MapPin,
+//   Phone,
+//   Search,
+//   Send,
+//   Utensils,
+//   X,
+// } from "lucide-react";
+// import { categories, menuItems, type MenuItem } from "@/data/menu";
 
-// /* ─────────────────────── Types ─────────────────────── */
+// type Tab = "menu" | "saved" | "cafe";
 
-// type Tag = "پرفروش" | "جدید";
-
-// interface Category {
-//   id: string;
-//   label: string;
-// }
-
-// interface Item {
-//   id: string;
-//   category: string;
-//   name: string;
-//   desc: string;
-//   price: string;
-//   image: string;
-//   tag?: Tag;
-// }
-
-// /* ─────────────────────── Data ─────────────────────── */
-
-// const categories: Category[] = [
-//   { id: "all", label: "همه" },
-//   { id: "coffee", label: "قهوه" },
-//   { id: "drinks", label: "نوشیدنی" },
-//   { id: "desserts", label: "دسر" },
-//   { id: "food", label: "غذا" },
-// ];
-
-// const img = (id: string) => `https://images.unsplash.com/${id}?w=500&q=80`;
-
-// const items: Item[] = [
-//   { id: "c1", category: "coffee", name: "اسپرسو", desc: "شوت غلیظ با عطر دانه‌های تازه و کرمای طلایی", price: "۸۵,۰۰۰", image: img("photo-1510707577719-ae7c14805e3a") },
-//   { id: "c2", category: "coffee", name: "لاته افرومارکت", desc: "اسپرسو، شیر میکروفوم و یک لمسه وانیل", price: "۱۲۵,۰۰۰", tag: "پرفروش", image: img("photo-1461023058943-07fcbe16d735") },
-//   { id: "c3", category: "coffee", name: "کاپوچینو", desc: "اسپرسو، شیر گرم و فوم ابریشمی", price: "۱۱۵,۰۰۰", image: img("photo-1572442388796-11668a67e53d") },
-//   { id: "c4", category: "coffee", name: "کورتادو", desc: "اسپرسو و شیر گرم با تعادل کلاسیک", price: "۱۰۵,۰۰۰", tag: "جدید", image: img("photo-1509042239860-f550ce710b93") },
-//   { id: "c5", category: "coffee", name: "آمریکانو", desc: "اسپرسو و آب داغ، طعمی ملایم و دلنشین", price: "۹۵,۰۰۰", image: img("photo-1497636577773-f1231844b336") },
-//   { id: "c6", category: "coffee", name: "ماتشا لاته", desc: "چای سبز ژاپنی با شیر و عطر ملایم", price: "۱۴۵,۰۰۰", image: img("photo-1515823064-d6e0c04616a7") },
-//   { id: "c7", category: "coffee", name: "موکا", desc: "ترکیب اسپرسو، شکلات و شیر بخارپز", price: "۱۳۵,۰۰۰", image: img("photo-1570968915860-54d5c301fa9f") },
-//   { id: "d1", category: "drinks", name: "چای ایرانی", desc: "چای دم‌کرده با عطر بهاره و طعمی اصیل", price: "۳۰,۰۰۰", image: img("photo-1544787219-7f47ccb76574") },
-//   { id: "d2", category: "drinks", name: "چای ترش", desc: "دمنوش خوش‌رنگ با طعمی متفاوت", price: "۵۵,۰۰۰", image: img("photo-1576092768241-dec231879fc3") },
-//   { id: "d3", category: "drinks", name: "لیموناد خیار", desc: "لیمو، خیار، نعنا و طراوت یک روز تابستانی", price: "۸۰,۰۰۰", tag: "پرفروش", image: img("photo-1513558161293-cdaf765edfd4") },
-//   { id: "d4", category: "drinks", name: "آب پرتقال", desc: "پرتقال تازه، بدون شکر افزوده", price: "۹۰,۰۰۰", image: img("photo-1600271886742-f049cd451bba") },
-//   { id: "d5", category: "drinks", name: "اسموتی توت‌فرنگی", desc: "توت‌فرنگی، موز و ماست یونانی", price: "۱۲۵,۰۰۰", image: img("photo-1505252585461-04db1eb84625") },
-//   { id: "d6", category: "drinks", name: "دمنوش زعفران", desc: "دمنوش زعفران با عطر گرم و دلنشین", price: "۷۰,۰۰۰", tag: "جدید", image: img("photo-1544787219-7f47ccb76574") },
-//   { id: "s1", category: "desserts", name: "چیزکیک نیویورکی", desc: "چیزکیک کلاسیک با سس توت‌فرنگی", price: "۱۵۰,۰۰۰", tag: "پرفروش", image: img("photo-1533134242443-d4fd215305ad") },
-//   { id: "s2", category: "desserts", name: "تیرامیسو", desc: "دسر ایتالیایی با قهوه و ماسکارپونه", price: "۱۶۵,۰۰۰", image: img("photo-1571877227200-a0d98ea607e9") },
-//   { id: "s3", category: "desserts", name: "براونی با بستنی", desc: "براونی شکلاتی گرم با بستنی وانیلی", price: "۱۴۰,۰۰۰", image: img("photo-1606313564200-e75d5e30476c") },
-//   { id: "s4", category: "desserts", name: "پنکیک", desc: "پنکیک خانگی با عسل و میوه تازه", price: "۱۳۵,۰۰۰", image: img("photo-1528207776546-365bb710ee93") },
-//   { id: "s5", category: "desserts", name: "کرم بروله", desc: "دسر فرانسوی با کرم وانیلی لطیف", price: "۱۵۰,۰۰۰", image: img("photo-1488477181946-6428a0291777") },
-//   { id: "s6", category: "desserts", name: "کیک شکلاتی", desc: "کیک شکلاتی با مغز نرم و غلیظ", price: "۱۴۵,۰۰۰", tag: "جدید", image: img("photo-1578985545062-69928b1d9587") },
-//   { id: "f1", category: "food", name: "ساندویچ مرغ", desc: "مرغ گریل، سبزیجات تازه و سس مخصوص", price: "۱۸۰,۰۰۰", image: img("photo-1521390188846-e2a3a97453a0") },
-//   { id: "f2", category: "food", name: "ساندویچ آووکادو", desc: "آووکادو، پنیر و سبزیجات تازه", price: "۱۶۵,۰۰۰", tag: "پرفروش", image: img("photo-1528735602780-2552fd46c7af") },
-//   { id: "f3", category: "food", name: "پیتزا مارگاریتا", desc: "سس گوجه، موزارلا و رزماری", price: "۲۲۰,۰۰۰", image: img("photo-1574071318508-1cdbab80d002") },
-//   { id: "f4", category: "food", name: "پاستا آلفردو", desc: "پاستا با سس خامه‌ای و مرغ", price: "۲۰۰,۰۰۰", image: img("photo-1645112411341-6c4fd023714a") },
-//   { id: "f5", category: "food", name: "سالاد سزار", desc: "کاهو، مرغ گریل، کروتون و سس سزار", price: "۱۷۵,۰۰۰", image: img("photo-1546793665-c74683f339c1") },
-//   { id: "f6", category: "food", name: "سوپ روز", desc: "سوپ فصل با نان تست تازه", price: "۱۲۰,۰۰۰", tag: "جدید", image: img("photo-1547592166-23ac45744acd") },
-// ];
-
-// const coffeeBlends = [
-//   { id: "50/50", label: "۵۰ / ۵۰", title: "متعادل و کلاسیک", description: "ترکیبی متعادل با طعمی دلنشین، مناسب برای مصرف روزانه.", body: 75, acidity: 55, aroma: 70, arabica: "50%", robusta: "50%" },
-//   { id: "70/30", label: "۷۰ / ۳۰", title: "ملایم و خوش‌عطر", description: "عطر بیشتر، تلخی کنترل‌شده و تجربه‌ای لطیف‌تر.", body: 65, acidity: 75, aroma: 90, arabica: "70%", robusta: "30%" },
-//   { id: "100%", label: "۱۰۰٪ عربیکا", title: "خالص و اصیل", description: "۱۰۰٪ عربیکا؛ عطری پیچیده‌تر و طعمی ظریف و خاص.", body: 55, acidity: 90, aroma: 95, arabica: "100%", robusta: "0%" },
-// ];
-
-// const navLinks = [
-//   ["خانه", "#home"],
-//   ["پیشنهاد ویژه", "#featured"],
-//   ["منو", "#menu"],
-//   ["ترکیب قهوه", "#blend"],
-//   ["درباره ما", "#about"],
-//   ["تماس", "#contact"],
-// ];
-
-// const sections = categories.filter((c) => c.id !== "all");
-
-// const chapterNote: Record<string, string> = {
-//   coffee: "اسپرسو، شیر و دانه‌های تازه",
-//   drinks: "دمنوش، آب‌میوه و نوشیدنی‌های خنک",
-//   desserts: "شیرینی‌های دست‌ساز برای بعد از قهوه",
-//   food: "سبک و سیر، برای هر ساعت از روز",
+// const categoryIcons: Record<string, ReactNode> = {
+//   همه: <Grid2X2 size={17} />,
+//   پیش‌غذا: <Utensils size={17} />,
+//   سالاد: <Heart size={17} />,
+//   پاستا: <Utensils size={17} />,
+//   "غذای اصلی": <Utensils size={17} />,
+//   پیتزا: <Grid2X2 size={17} />,
+//   عصرانه: <Coffee size={17} />,
+//   "اسپرسو بار": <Coffee size={17} />,
+//   "نوشیدنی گرم": <Coffee size={17} />,
+//   "سرد کافئین‌دار": <Coffee size={17} />,
+//   "شیک و اسموتی": <Coffee size={17} />,
+//   "دمی بار": <Coffee size={17} />,
 // };
 
-// const chapterLatin: Record<string, string> = {
-//   coffee: "Coffee",
-//   drinks: "Refreshers",
-//   desserts: "Desserts",
-//   food: "Kitchen",
-// };
+// const fa = (n: number) => new Intl.NumberFormat("fa-IR").format(n);
 
-// const EASE = [0.22, 1, 0.36, 1] as const;
-// const fa = (n: number) => n.toLocaleString("fa-IR");
-// const large = (src: string) => src.replace("w=500", "w=900");
-
-// /* ─────────────────────── Small pieces ─────────────────────── */
-
-// function Logo({ light = false }: { light?: boolean }) {
-//   return (
-//     <a href="#home" className="flex items-baseline gap-1.5" aria-label="Afroumarket">
-//       <span
-//         className={`font-brand text-[21px] font-semibold tracking-wide ${
-//           light ? "text-white" : "text-[#1D4D3F]"
-//         }`}
-//       >
-//         Afroumarket
-//       </span>
-//       <span className="h-1 w-1 rounded-full bg-[#CD9E6A]" />
-//     </a>
-//   );
+// function formatPrice(value: string) {
+//   const n = Number(value);
+//   return Number.isFinite(n) ? fa(n) : value;
 // }
 
-// /** the arch (طاق) — the shape this whole page is built around */
-// function ArchMark({ className = "" }: { className?: string }) {
-//   return (
-//     <svg
-//       aria-hidden
-//       width="26"
-//       height="34"
-//       viewBox="0 0 26 34"
-//       fill="none"
-//       className={className}
-//     >
-//       <path d="M2 33V13a11 11 0 0 1 22 0v20" stroke="#CD9E6A" strokeWidth="1.5" strokeLinecap="round" />
-//     </svg>
-//   );
-// }
+// const realCategories = categories.filter((c) => c !== "همه");
 
-// function MenuCard({ item }: { item: Item }) {
-//   return (
-//     <motion.article
-//       initial={{ opacity: 0, y: 28 }}
-//       whileInView={{ opacity: 1, y: 0 }}
-//       viewport={{ once: true, amount: 0.15 }}
-//       transition={{ duration: 0.8, ease: EASE }}
-//       className="group relative"
-//     >
-//       {/* soft square */}
-//       <div className="relative aspect-square overflow-hidden rounded-[40px] bg-[#F5F2ED]">
-//         <img
-//           src={large(item.image)}
-//           alt={item.name}
-//           loading="lazy"
-//           className="h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.06]"
-//         />
-//         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F2A22]/45 via-transparent to-transparent" />
+// export default function HomePage() {
+//   const [activeCategory, setActiveCategory] = useState("همه");
+//   const [query, setQuery] = useState("");
+//   const [tab, setTab] = useState<Tab>("menu");
+//   const [saved, setSaved] = useState<number[]>([]);
+//   const [ready, setReady] = useState(false);
+//   const [showScrollTop, setShowScrollTop] = useState(false);
 
-//         {item.tag && (
-//           <span
-//             className={`absolute right-4 top-4 rounded-full px-3.5 py-1.5 text-[11px] font-bold backdrop-blur-md ${
-//               item.tag === "پرفروش" ? "bg-[#CD9E6A] text-white" : "bg-white/90 text-[#1D4D3F]"
+//   useEffect(() => {
+//     const handleScroll = () => setShowScrollTop(window.scrollY > 350);
+//     window.addEventListener("scroll", handleScroll, { passive: true });
+//     handleScroll();
+//     return () => window.removeEventListener("scroll", handleScroll);
+//   }, []);
+
+//   useEffect(() => {
+//     try {
+//       const raw = localStorage.getItem("afour_saved_items");
+//       if (raw) setSaved(JSON.parse(raw));
+//     } catch {
+//       setSaved([]);
+//     }
+//     setReady(true);
+//   }, []);
+
+//   useEffect(() => {
+//     if (ready) {
+//       localStorage.setItem("afour_saved_items", JSON.stringify(saved));
+//     }
+//   }, [saved, ready]);
+
+//   const normalizedQuery = query.trim().toLocaleLowerCase("fa");
+
+//   const visibleItems = useMemo(() => {
+//     const source =
+//       tab === "saved"
+//         ? menuItems.filter((item) => saved.includes(item.id))
+//         : menuItems;
+
+//     return source.filter((item) => {
+//       const categoryMatch =
+//         tab === "saved" ||
+//         !!normalizedQuery ||
+//         activeCategory === "همه" ||
+//         item.category === activeCategory;
+
+//       const searchMatch =
+//         !normalizedQuery ||
+//         `${item.title} ${item.description} ${item.category}`
+//           .toLocaleLowerCase("fa")
+//           .includes(normalizedQuery);
+
+//       return categoryMatch && searchMatch;
+//     });
+//   }, [activeCategory, normalizedQuery, saved, tab]);
+
+//   const grouped = useMemo(() => {
+//     if (tab !== "menu" || normalizedQuery || activeCategory !== "همه") {
+//       return null;
+//     }
+
+//     return realCategories
+//       .map((name) => ({
+//         name,
+//         items: visibleItems.filter((item) => item.category === name),
+//       }))
+//       .filter((group) => group.items.length);
+//   }, [tab, normalizedQuery, activeCategory, visibleItems]);
+
+//   const toggleSaved = (id: number) => {
+//     setSaved((current) =>
+//       current.includes(id)
+//         ? current.filter((item) => item !== id)
+//         : [...current, id],
+//     );
+//   };
+
+//   const changeTab = (next: Tab) => {
+//     setTab(next);
+//     setQuery("");
+
+//     if (next === "menu") {
+//       setActiveCategory("همه");
+//     }
+
+//     window.scrollTo({ top: 0, behavior: "smooth" });
+//   };
+
+//   const selectCategory = (name: string) => {
+//     setActiveCategory(name);
+//     setQuery("");
+//   };
+
+//   const sectionTitle =
+//     tab === "saved"
+//       ? "انتخاب‌های شما"
+//       : normalizedQuery
+//         ? "نتایج جست‌وجو"
+//         : activeCategory === "همه"
+//           ? "طعم‌های A.Four"
+//           : activeCategory;
+
+//   return (
+//     <main
+//       dir="rtl"
+//       className="min-h-screen bg-[#ebe4d6] text-[#173d32]"
+//     >
+//       <div className="relative mx-auto min-h-screen w-full max-w-[600px] overflow-x-clip bg-[#f6f1e7] shadow-[0_0_100px_rgba(15,42,34,.13)]">
+
+//         {/* EDITORIAL HERO */}
+//         <section className="relative overflow-hidden bg-[#f6f1e7] text-[#173d32]">
+//           <div className="pointer-events-none absolute -left-24 -top-28 h-[310px] w-[310px] rounded-full border border-[#c69b65]/15" />
+//           <div className="pointer-events-none absolute -left-12 -top-16 h-[210px] w-[210px] rounded-full border border-[#c69b65]/10" />
+//           <div className="pointer-events-none absolute right-0 top-0 h-[3px] w-28 bg-gradient-to-l from-[#c69b65] to-transparent" />
+
+//           <div className="relative px-6 pb-7 pt-7 sm:px-8 sm:pb-9">
+//             <header className="flex items-center justify-between">
+//               <div>
+//                 <div className="flex items-baseline gap-2">
+//                   <span className="font-brand text-[37px] font-semibold italic leading-none tracking-tight text-[#173d32]">
+//                     A.Four
+//                   </span>
+//                   <span className="text-[9px] font-semibold tracking-[.24em] text-[#a07840]">
+//                     FOOD MARKET
+//                   </span>
+//                 </div>
+//                 <p className="mt-2 text-[10px] tracking-wide text-[#8b9185]">
+//                   یک انتخاب خوش‌طعم، برای هر لحظه
+//                 </p>
+//               </div>
+
+//               <div className="flex items-center gap-2 rounded-full border border-[#d9cfbd] bg-white/65 px-3 py-2 shadow-sm">
+//                 <span className="relative flex h-2 w-2">
+//                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#78916f] opacity-35" />
+//                   <span className="relative inline-flex h-2 w-2 rounded-full bg-[#78916f]" />
+//                 </span>
+//                 <span dir="ltr" className="text-[10px] font-semibold tracking-wide text-[#536b59]">
+//                   17:00 — 24:00
+//                 </span>
+//               </div>
+//             </header>
+
+//             <div className="relative mt-8 overflow-hidden rounded-[26px] bg-[#173d32] px-5 py-6 text-[#fffaf0] shadow-[0_18px_45px_rgba(23,61,50,.13)] sm:px-7 sm:py-8">
+//               <div className="pointer-events-none absolute -left-14 -top-20 h-56 w-56 rounded-full border border-[#d6b27f]/20" />
+//               <div className="pointer-events-none absolute -left-5 -top-11 h-40 w-40 rounded-full border border-dashed border-[#d6b27f]/15" />
+//               <div className="pointer-events-none absolute -bottom-24 right-20 h-52 w-52 rounded-full bg-[#d6b27f]/10 blur-3xl" />
+
+//               <div className="relative flex items-end justify-between gap-3">
+//                 <div className="min-w-0">
+//                   <div className="mb-4 flex items-center gap-2">
+//                     <span className="h-px w-7 bg-[#d6b27f]" />
+//                     <span className="text-[9px] font-semibold tracking-[.25em] text-[#d6b27f]">
+//                       THE A.FOUR MENU
+//                     </span>
+//                   </div>
+
+//                   <h1 className="text-[31px] font-bold leading-[1.65] tracking-tight sm:text-[37px]">
+//                     خوش‌طعم‌تر
+//                     <br />
+//                     <span className="font-light text-[#d6b27f]">از چیزی که فکر می‌کنی.</span>
+//                   </h1>
+
+//                   <p className="mt-3 max-w-[280px] text-[10px] leading-7 text-white/60 sm:text-[11px]">
+//                     از اولین انتخاب تا آخرین لقمه؛ چیزی برای لذت بردن پیدا می‌کنی.
+//                   </p>
+//                 </div>
+
+//                 <div className="mb-1 hidden shrink-0 text-left sm:block" dir="ltr">
+//                   <span className="block font-brand text-[58px] font-semibold italic leading-none text-[#d6b27f]/90">
+//                     04
+//                   </span>
+//                   <span className="mt-2 block text-[8px] tracking-[.28em] text-white/35">
+//                     GOOD TASTE
+//                   </span>
+//                 </div>
+
+//                 <div className="mb-1 grid h-[66px] w-[66px] shrink-0 place-items-center rounded-full border border-[#d6b27f]/35 bg-white/[0.06] sm:hidden">
+//                   <span className="font-brand text-[27px] font-semibold italic text-[#d6b27f]">
+//                     A4
+//                   </span>
+//                 </div>
+//               </div>
+
+//               <div className="relative mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+//                 <span className="text-[9px] tracking-wide text-white/45">
+//                   MADE FOR YOUR GOOD MOMENTS
+//                 </span>
+//                 <span className="font-brand text-[13px] italic text-[#d6b27f]">
+//                   Est. A.Four
+//                 </span>
+//               </div>
+//             </div>
+
+//             {tab !== "cafe" && (
+//               <div className="mt-5">
+//                 <label className="group flex h-[56px] items-center gap-3 rounded-2xl border border-[#e5dccd] bg-white/90 px-3.5 shadow-[0_8px_24px_rgba(23,61,50,.055)] transition-all duration-300 focus-within:border-[#c69b65] focus-within:shadow-[0_10px_28px_rgba(23,61,50,.10)]">
+//                   <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#f1eadf] text-[#98703f] transition-colors group-focus-within:bg-[#173d32] group-focus-within:text-[#d6b27f]">
+//                     <Search size={17} strokeWidth={1.8} />
+//                   </div>
+//                   <input
+//                     value={query}
+//                     onChange={(e) => setQuery(e.target.value)}
+//                     placeholder="دنبال چه طعمی می‌گردی؟"
+//                     className="h-full min-w-0 flex-1 bg-transparent text-[12px] font-medium text-[#173d32] outline-none placeholder:font-normal placeholder:text-[#a6a69a]"
+//                   />
+//                   {query ? (
+//                     <button
+//                       type="button"
+//                       onClick={() => setQuery("")}
+//                       aria-label="پاک کردن جست‌وجو"
+//                       className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#8c9388] transition hover:bg-[#f1eadf] hover:text-[#173d32]"
+//                     >
+//                       <X size={16} />
+//                     </button>
+//                   ) : (
+//                     <span className="shrink-0 text-[9px] font-semibold tracking-[.18em] text-[#b49a75]">
+//                       SEARCH
+//                     </span>
+//                   )}
+//                 </label>
+//               </div>
+//             )}
+//           </div>
+//         </section>
+
+//         {/* STICKY CATEGORY NAVIGATION */}
+//         {tab === "menu" && (
+//           <div className="sticky top-0 z-40 border-b border-[#e6dccb]/90 bg-[#f8f4ec]/95 shadow-[0_8px_24px_rgba(23,61,50,.08)] backdrop-blur-2xl">
+//             <div className="flex items-center gap-3 px-5 pb-3 pt-3 sm:px-7">
+//               <div className="flex shrink-0 flex-col items-start">
+//                 <span className="text-[10px] font-extrabold text-[#173d32]">
+//                   دسته‌ها
+//                 </span>
+//                 <span className="mt-0.5 text-[8px] font-medium tracking-[.16em] text-[#b08a56]">
+//                   MENU
+//                 </span>
+//               </div>
+
+//               <div className="h-8 w-px shrink-0 bg-[#e4d9c7]" />
+
+//               <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-0.5">
+//                 {categories.map((category) => {
+//                   const active = activeCategory === category;
+
+//                   return (
+//                     <button
+//                       key={category}
+//                       type="button"
+//                       onClick={() => selectCategory(category)}
+//                       aria-pressed={active}
+//                       className={`group relative flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2.5 transition-all duration-300 ${
+//                         active
+//                           ? "border-[#173d32] bg-[#173d32] text-[#fffaf0] shadow-[0_5px_14px_rgba(23,61,50,.18)]"
+//                           : "border-[#e6dccb] bg-white/70 text-[#68776c] hover:border-[#c69b65]/70 hover:bg-white hover:text-[#173d32]"
+//                       }`}
+//                     >
+//                       <span className={active ? "text-[#d6b27f]" : "text-[#a07840]/75"}>
+//                         {categoryIcons[category] ?? <Utensils size={16} />}
+//                       </span>
+//                       <span className="whitespace-nowrap text-[10px] font-semibold">
+//                         {category}
+//                       </span>
+//                       {active && (
+//                         <span className="h-1 w-1 rounded-full bg-[#d6b27f]" />
+//                       )}
+//                     </button>
+//                   );
+//                 })}
+//               </div>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* MAIN CONTENT */}
+//         {tab === "cafe" ? (
+//           <CafeInfo />
+//         ) : (
+//           <section className="px-6 pb-36 pt-9 sm:px-8">
+
+//             {/* SECTION HEADING */}
+//             <div className="mb-6 flex items-end justify-between">
+
+//               <div>
+//                 <span className="mb-2 block text-[9px] font-medium tracking-[.22em] text-[#a07840]">
+//                   {tab === "saved" ? "YOUR COLLECTION" : "A.FOUR SELECTION"}
+//                 </span>
+
+//                 <h2 className="text-[25px] font-bold leading-tight text-[#173d32]">
+//                   {sectionTitle}
+//                 </h2>
+//               </div>
+
+//               <div className="flex flex-col items-end">
+//                 <span className="font-brand text-[25px] italic leading-none text-[#c69b65]">
+//                   {fa(visibleItems.length)}
+//                 </span>
+//                 <span className="mt-1 text-[9px] text-[#879087]">
+//                   آیتم
+//                 </span>
+//               </div>
+
+//             </div>
+
+//             <div className="mb-6 flex items-center gap-3">
+//               <div className="h-[2px] w-9 rounded-full bg-[#c69b65]" />
+//               <div className="h-px flex-1 bg-gradient-to-l from-[#e6dccb] to-transparent" />
+//             </div>
+
+//             {visibleItems.length === 0 ? (
+//               <EmptyState
+//                 saved={tab === "saved"}
+//                 onBack={() => changeTab("menu")}
+//               />
+//             ) : grouped ? (
+//               <div key="all" className="fade-in space-y-10">
+//                 {grouped.map((group, index) => (
+//                   <section key={group.name}>
+//                     <div className="mb-5 flex items-center gap-3">
+//                       <span className="font-brand text-sm italic text-[#c69b65]">
+//                         {String(index + 1).padStart(2, "0")}
+//                       </span>
+
+//                       <h3 className="text-base font-bold text-[#173d32]">
+//                         {group.name}
+//                       </h3>
+
+//                       <div className="h-px flex-1 bg-[#e6dccb]" />
+
+//                       <span className="text-[10px] text-[#a07840]">
+//                         {fa(group.items.length)} محصول
+//                       </span>
+//                     </div>
+
+//                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+//                       {group.items.map((item) => (
+//                         <MenuCard
+//                           key={item.id}
+//                           item={item}
+//                           saved={saved.includes(item.id)}
+//                           onToggle={() => toggleSaved(item.id)}
+//                         />
+//                       ))}
+//                     </div>
+//                   </section>
+//                 ))}
+//               </div>
+//             ) : (
+//               <div
+//                 key={`${tab}-${activeCategory}-${normalizedQuery}`}
+//                 className="fade-in grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4"
+//               >
+//                 {visibleItems.map((item) => (
+//                   <MenuCard
+//                     key={item.id}
+//                     item={item}
+//                     saved={saved.includes(item.id)}
+//                     onToggle={() => toggleSaved(item.id)}
+//                     showCategory={tab === "saved" || !!normalizedQuery}
+//                   />
+//                 ))}
+//               </div>
+//             )}
+
+//             {visibleItems.length > 0 && (
+//               <div className="mt-12 flex flex-col items-center">
+
+//                 <div className="mb-3 flex items-center gap-3">
+//                   <span className="h-px w-10 bg-[#d6b27f]/50" />
+//                   <span className="font-brand text-[21px] italic text-[#c69b65]">
+//                     A.Four
+//                   </span>
+//                   <span className="h-px w-10 bg-[#d6b27f]/50" />
+//                 </div>
+
+//                 <p className="text-[10px] text-[#9a9589]">
+//                   قیمت‌ها به هزار تومان است.
+//                 </p>
+
+//               </div>
+//             )}
+
+//           </section>
+//         )}
+
+//         {/* BACK TO TOP */}
+//         <div className="pointer-events-none fixed bottom-[92px] left-1/2 z-[60] w-full max-w-[600px] -translate-x-1/2 px-5">
+//           <button
+//             type="button"
+//             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+//             aria-label="بازگشت به بالای صفحه"
+//             className={`pointer-events-auto ml-auto grid h-12 w-12 place-items-center rounded-2xl border border-[#d6b27f]/40 bg-[#173d32]/95 text-[#e6c99d] shadow-[0_8px_25px_rgba(23,61,50,.25)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:bg-[#c69b65] hover:text-[#173d32] ${
+//               showScrollTop
+//                 ? "translate-y-0 scale-100 opacity-100"
+//                 : "pointer-events-none translate-y-5 scale-75 opacity-0"
 //             }`}
 //           >
-//             {item.tag}
+//             <ArrowUp size={20} strokeWidth={1.8} />
+//           </button>
+//         </div>
+
+//         {/* BOTTOM NAVIGATION */}
+//         <nav className="fixed bottom-0 left-1/2 z-50 flex h-[76px] w-full max-w-[600px] -translate-x-1/2 items-center justify-around border-t border-[#e6dccb]/80 bg-[#fbf8f2]/95 px-7 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_35px_rgba(23,61,50,.07)] backdrop-blur-2xl">
+
+//           <NavButton
+//             active={tab === "menu"}
+//             label="منو"
+//             icon={<Utensils size={20} strokeWidth={1.6} />}
+//             onClick={() => changeTab("menu")}
+//           />
+
+//           <NavButton
+//             active={tab === "saved"}
+//             label="علاقه‌مندی‌ها"
+//             icon={<Bookmark size={20} strokeWidth={1.6} />}
+//             count={saved.length}
+//             onClick={() => changeTab("saved")}
+//           />
+
+//           <NavButton
+//             active={tab === "cafe"}
+//             label="درباره ما"
+//             icon={<Coffee size={20} strokeWidth={1.6} />}
+//             onClick={() => changeTab("cafe")}
+//           />
+
+//         </nav>
+
+//         <style jsx global>{`
+//           @keyframes afourFadeUp {
+//             from { opacity: 0; transform: translateY(10px); }
+//             to { opacity: 1; transform: translateY(0); }
+//           }
+//           .fade-in {
+//             animation: afourFadeUp 420ms cubic-bezier(.2,.7,.25,1) both;
+//           }
+//           .no-scrollbar {
+//             -ms-overflow-style: none;
+//             scrollbar-width: none;
+//           }
+//           .no-scrollbar::-webkit-scrollbar {
+//             display: none;
+//           }
+//           @media (prefers-reduced-motion: reduce) {
+//             .fade-in { animation: none; }
+//           }
+//         `}</style>
+
+//       </div>
+//     </main>
+//   );
+// }
+
+// /* MENU CARD */
+
+// function MenuCard({
+//   item,
+//   saved,
+//   onToggle,
+//   showCategory,
+// }: {
+//   item: MenuItem;
+//   saved: boolean;
+//   onToggle: () => void;
+//   showCategory?: boolean;
+// }) {
+//   const [imageError, setImageError] = useState(false);
+//   const imageSrc = `/images/menu/${item.id}.webp`;
+
+//   return (
+//     <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-[20px] border border-[#e8dfd1] bg-[#fffdf8] shadow-[0_5px_18px_rgba(23,61,50,.045)] transition-all duration-300 hover:-translate-y-1 hover:border-[#c69b65]/50 hover:shadow-[0_14px_30px_rgba(23,61,50,.10)]">
+//       <div className="relative aspect-square overflow-hidden bg-[#eee7da]">
+//         {!imageError ? (
+//           <img
+//             src={imageSrc}
+//             alt={item.title}
+//             loading="lazy"
+//             onError={() => setImageError(true)}
+//             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+//           />
+//         ) : (
+//           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#e9dfce] via-[#f5eee2] to-[#d8c7ab]">
+//             <div className="flex flex-col items-center gap-3 text-[#a07840]/60">
+//               <Coffee size={36} strokeWidth={1} />
+//               <span className="text-[9px] tracking-[.2em]">A.FOUR</span>
+//             </div>
+//           </div>
+//         )}
+
+//         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#142d24]/35 to-transparent" />
+
+//         <div className="absolute bottom-3 right-3">
+//           <span className="rounded-lg border border-white/20 bg-[#173d32]/65 px-2.5 py-1 text-[9px] font-medium text-white backdrop-blur-md">
+//             A.Four Selection
+//           </span>
+//         </div>
+
+//         <button
+//           type="button"
+//           onClick={onToggle}
+//           aria-label={saved ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
+//           aria-pressed={saved}
+//           className={`absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full border backdrop-blur-xl transition-all duration-300 ${
+//             saved
+//               ? "border-[#d6b27f]/60 bg-[#173d32] text-[#e6c99d]"
+//               : "border-white/60 bg-white/80 text-[#173d32] hover:bg-[#173d32] hover:text-[#d6b27f]"
+//           }`}
+//         >
+//           <Bookmark
+//             size={15}
+//             strokeWidth={1.7}
+//             fill={saved ? "currentColor" : "none"}
+//           />
+//         </button>
+//       </div>
+
+//       <div className="flex flex-1 flex-col p-3 sm:p-4">
+//         {showCategory && (
+//           <span className="mb-1.5 text-[9px] font-medium text-[#a07840]">
+//             {item.category}
 //           </span>
 //         )}
-//       </div>
 
-//       {/* gold outline, one step out */}
-//       <div className="pointer-events-none absolute -inset-2 rounded-[48px] border border-[#CD9E6A]/30 transition-colors duration-700 group-hover:border-[#CD9E6A]/70" />
+//         <h3 className="line-clamp-1 text-[13px] font-bold leading-7 text-[#173d32] sm:text-[14px]">
+//           {item.title}
+//         </h3>
 
-//       {/* glass label */}
-//       <div className="absolute inset-x-3 bottom-3 rounded-[28px] bg-white/85 p-5 shadow-[0_18px_40px_-20px_rgba(15,42,34,0.5)] backdrop-blur-xl sm:p-6">
-//         <div className="flex items-baseline justify-between gap-4">
-//           <h3 className="text-lg font-bold text-[#1D4D3F] sm:text-xl">{item.name}</h3>
-//           <div className="flex shrink-0 items-baseline gap-1">
-//             <span className="text-lg font-extrabold text-[#A07840] sm:text-xl">{item.price}</span>
-//             <span className="text-[10px] text-[#1D4D3F]/45">تومان</span>
+//         <p className="mt-1 line-clamp-2 min-h-[38px] text-[10px] font-light leading-[1.9] text-[#828b80] sm:text-[11px]">
+//           {item.description || "یک انتخاب خوش‌طعم از منوی A.Four"}
+//         </p>
+
+//         <div className="mb-2 mt-3 h-px bg-[#eae2d6]" />
+
+//         <div className="mt-auto flex items-center justify-between gap-1">
+//           <div className="min-w-0">
+//             <span className="block text-[9px] text-[#9b9a8d]">قیمت</span>
+//             <span className="mt-1 block whitespace-nowrap text-[13px] font-bold tabular-nums text-[#98703f] sm:text-[14px]">
+//               {formatPrice(item.price)}
+//               <span className="mr-1 text-[9px] font-normal text-[#a5a095]">
+//                 تومان
+//               </span>
+//             </span>
+//           </div>
+
+//           <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#173d32] text-[#d6b27f] transition-all duration-300 group-hover:bg-[#c69b65] group-hover:text-[#173d32]">
+//             <ChevronLeft size={16} />
 //           </div>
 //         </div>
-//         <p className="mt-2 line-clamp-2 text-xs leading-6 text-[#1D4D3F]/55 sm:text-[13px]">
-//           {item.desc}
+//       </div>
+//     </article>
+//   );
+// }
+
+// /* EMPTY STATE */
+
+// function EmptyState({
+//   saved,
+//   onBack,
+// }: {
+//   saved: boolean;
+//   onBack: () => void;
+// }) {
+//   return (
+//     <div className="flex min-h-[330px] flex-col items-center justify-center rounded-[25px] border border-[#e9dfd0] bg-[#fbf8f2] px-6 text-center">
+
+//       <div className="grid h-16 w-16 place-items-center rounded-2xl border border-[#c69b65]/30 bg-[#c69b65]/10 text-[#a07840]">
+//         {saved ? <Bookmark size={27} /> : <Search size={27} />}
+//       </div>
+
+//       <h3 className="mt-6 text-[16px] font-bold text-[#173d32]">
+//         {saved ? "هنوز انتخابی ندارید" : "موردی پیدا نشد"}
+//       </h3>
+
+//       <p className="mt-2 max-w-[240px] text-[11px] leading-7 text-[#8a9289]">
+//         {saved
+//           ? "با انتخاب نشانک کنار هر آیتم، آن را به لیست علاقه‌مندی‌های خود اضافه کنید."
+//           : "عبارت دیگری را جست‌وجو کنید یا دسته‌بندی دیگری را انتخاب کنید."}
+//       </p>
+
+//       {saved && (
+//         <button
+//           onClick={onBack}
+//           className="mt-6 flex items-center gap-2 rounded-xl bg-[#173d32] px-6 py-3 text-[11px] font-bold text-white transition hover:bg-[#0f2a22]"
+//         >
+//           مشاهده منو
+//           <ChevronLeft size={15} />
+//         </button>
+//       )}
+
+//     </div>
+//   );
+// }
+
+// /* CAFE INFORMATION */
+
+// function CafeInfo() {
+//   return (
+//     <section className="px-6 pb-36 pt-10 sm:px-8">
+
+//       <div className="relative overflow-hidden rounded-[28px] bg-[#173d32] px-6 py-10 text-center text-white">
+
+//         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full border border-[#d6b27f]/15" />
+//         <div className="pointer-events-none absolute -bottom-16 -left-10 h-40 w-40 rounded-full border border-[#d6b27f]/15" />
+
+//         <div className="relative">
+
+//           <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[#d6b27f]/40 bg-[#d6b27f]/10 text-[#d6b27f]">
+//             <Coffee size={25} strokeWidth={1.3} />
+//           </div>
+
+//           <div className="mt-5 font-brand text-[46px] font-semibold italic leading-none text-[#d6b27f]">
+//             A.Four
+//           </div>
+
+//           <p className="mt-4 text-[11px] tracking-[.25em] text-white/65">
+//             FOOD MARKET
+//           </p>
+
+//           <div className="mx-auto mt-6 h-px w-16 bg-[#d6b27f]/50" />
+
+//           <p className="mt-5 text-[13px] font-light text-white/80">
+//             جایی برای همه
+//           </p>
+
+//         </div>
+//       </div>
+
+//       <div className="mb-5 mt-9 flex items-center justify-between">
+//         <h2 className="text-[19px] font-bold text-[#173d32]">
+//           اطلاعات کافه
+//         </h2>
+//         <span className="font-brand text-[17px] italic text-[#c69b65]">
+//           CONTACT
+//         </span>
+//       </div>
+
+//       <div className="overflow-hidden rounded-[23px] border border-[#e9dfd0] bg-[#fbf8f2] px-5">
+
+//         <InfoRow
+//           icon={<MapPin size={19} />}
+//           label="آدرس"
+//           value="زیباشهر منطقه ۲، بلوار مطهری، شقایق ۷"
+//         />
+
+//         <InfoRow
+//           icon={<Clock3 size={19} />}
+//           label="ساعت کاری"
+//           value="۱۷:۰۰ تا ۲۴:۰۰، همه روزه"
+//         />
+
+//         <InfoRow
+//           icon={<Phone size={19} />}
+//           label="تماس با ما"
+//           value="0900 285 4000"
+//           ltr
+//           href="tel:09002854000"
+//           last
+//         />
+
+//       </div>
+
+//       <div className="mt-6 grid grid-cols-2 gap-3">
+
+//         <a
+//           href="https://instagram.com/A.fourcenter"
+//           target="_blank"
+//           rel="noreferrer"
+//           className="flex items-center justify-center gap-2 rounded-2xl border border-[#173d32]/20 bg-[#fbf8f2] py-4 text-[12px] font-bold text-[#173d32] transition hover:border-[#c69b65] hover:bg-[#f0e7d8]"
+//         >
+//           اینستاگرام
+//         </a>
+
+//         <a
+//           href="https://t.me/Afourcenter"
+//           target="_blank"
+//           rel="noreferrer"
+//           className="flex items-center justify-center gap-2 rounded-2xl bg-[#173d32] py-4 text-[12px] font-bold text-white transition hover:bg-[#0f2a22]"
+//         >
+//           <Send size={15} />
+//           تلگرام
+//         </a>
+
+//       </div>
+
+//       <p className="mt-10 text-center text-[11px] font-light text-[#92958b]">
+//         خوشحالیم که انتخابمان کرده‌اید.
+//       </p>
+
+//     </section>
+//   );
+// }
+
+// /* INFORMATION ROW */
+
+// function InfoRow({
+//   icon,
+//   label,
+//   value,
+//   ltr,
+//   href,
+//   last,
+// }: {
+//   icon: ReactNode;
+//   label: string;
+//   value: string;
+//   ltr?: boolean;
+//   href?: string;
+//   last?: boolean;
+// }) {
+//   const body = (
+//     <>
+//       <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-[#c69b65]/30 bg-[#c69b65]/10 text-[#a07840]">
+//         {icon}
+//       </div>
+
+//       <div className="min-w-0 flex-1">
+//         <p className="text-[10px] font-light text-[#96978d]">
+//           {label}
+//         </p>
+
+//         <p
+//           dir={ltr ? "ltr" : undefined}
+//           className={`mt-1 text-[13px] font-bold leading-7 text-[#173d32] ${
+//             ltr ? "text-right" : ""
+//           }`}
+//         >
+//           {value}
 //         </p>
 //       </div>
-//     </motion.article>
+//     </>
+//   );
+
+//   const cls = `flex items-center gap-4 py-5 ${
+//     last ? "" : "border-b border-[#e9dfd0]"
+//   }`;
+
+//   return href ? (
+//     <a href={href} className={cls}>
+//       {body}
+//     </a>
+//   ) : (
+//     <div className={cls}>{body}</div>
 //   );
 // }
 
-// function CoffeeBlendSelector() {
-//   const [selected, setSelected] = useState("70/30");
-//   const active = coffeeBlends.find((b) => b.id === selected) ?? coffeeBlends[1];
+// /* BOTTOM NAVIGATION BUTTON */
 
+// function NavButton({
+//   active,
+//   label,
+//   icon,
+//   count,
+//   onClick,
+// }: {
+//   active: boolean;
+//   label: string;
+//   icon: ReactNode;
+//   count?: number;
+//   onClick: () => void;
+// }) {
 //   return (
-//     <section id="blend" className="px-5 md:px-8">
-//       <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[36px] bg-[#1D4D3F] px-6 py-16 md:px-16 md:py-24">
-//         <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[#CD9E6A]/[0.12] blur-[90px]" />
-
-//         <div className="relative mx-auto max-w-3xl">
-//           <div className="mb-12 text-center">
-//             <h2 className="text-3xl font-light text-white md:text-5xl">ترکیب قهوه‌ات را انتخاب کن</h2>
-//             <p className="mt-4 text-sm text-white/50">هر ترکیب، تجربه‌ای متفاوت از طعم و عطر</p>
-//           </div>
-
-//           <div className="mx-auto grid max-w-xl grid-cols-3 border-b border-white/15">
-//             {coffeeBlends.map((blend) => (
-//               <button
-//                 key={blend.id}
-//                 onClick={() => setSelected(blend.id)}
-//                 className={`relative py-4 text-sm transition-colors duration-300 ${
-//                   selected === blend.id ? "font-bold text-white" : "text-white/45 hover:text-white/80"
-//                 }`}
-//               >
-//                 {blend.label}
-//                 {selected === blend.id && (
-//                   <motion.span
-//                     layoutId="blendUnderline"
-//                     className="absolute inset-x-6 -bottom-px h-[2px] bg-[#CD9E6A]"
-//                     transition={{ type: "spring", stiffness: 380, damping: 32 }}
-//                   />
-//                 )}
-//               </button>
-//             ))}
-//           </div>
-
-//           <AnimatePresence mode="wait">
-//             <motion.div
-//               key={active.id}
-//               initial={{ opacity: 0, y: 10 }}
-//               animate={{ opacity: 1, y: 0 }}
-//               exit={{ opacity: 0, y: -6 }}
-//               transition={{ duration: 0.3, ease: EASE }}
-//               className="mx-auto mt-12 grid max-w-xl gap-10 md:grid-cols-2 md:gap-14"
-//             >
-//               <div>
-//                 <h3 className="text-xl font-bold text-white">{active.title}</h3>
-//                 <p className="mt-3 text-sm leading-8 text-white/55">{active.description}</p>
-//                 <div className="mt-6 flex gap-10">
-//                   <div>
-//                     <p className="text-xs text-white/40">عربیکا</p>
-//                     <p className="mt-1 text-2xl font-light text-[#CD9E6A]" dir="ltr">{active.arabica}</p>
-//                   </div>
-//                   <div>
-//                     <p className="text-xs text-white/40">روبوستا</p>
-//                     <p className="mt-1 text-2xl font-light text-[#CD9E6A]" dir="ltr">{active.robusta}</p>
-//                   </div>
-//                 </div>
-//               </div>
-
-//               <div className="space-y-6 self-center">
-//                 {[
-//                   { label: "بدنه", value: active.body },
-//                   { label: "اسیدیته", value: active.acidity },
-//                   { label: "عطر", value: active.aroma },
-//                 ].map((row) => (
-//                   <div key={row.label}>
-//                     <div className="mb-2 flex justify-between text-xs">
-//                       <span className="text-white/70">{row.label}</span>
-//                       <span className="text-[#CD9E6A]">{row.value}%</span>
-//                     </div>
-//                     <div className="h-px bg-white/15">
-//                       <motion.div
-//                         initial={{ width: 0 }}
-//                         animate={{ width: `${row.value}%` }}
-//                         transition={{ duration: 0.8, ease: EASE }}
-//                         className="h-[2px] -translate-y-px rounded-full bg-[#CD9E6A]"
-//                       />
-//                     </div>
-//                   </div>
-//                 ))}
-//               </div>
-//             </motion.div>
-//           </AnimatePresence>
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-// function BackToTop() {
-//   const [visible, setVisible] = useState(false);
-
-//   useEffect(() => {
-//     const onScroll = () => setVisible(window.scrollY > 400);
-//     window.addEventListener("scroll", onScroll, { passive: true });
-//     onScroll();
-//     return () => window.removeEventListener("scroll", onScroll);
-//   }, []);
-
-//   return (
-//     <AnimatePresence>
-//       {visible && (
-//         <motion.button
-//           initial={{ opacity: 0, y: 16 }}
-//           animate={{ opacity: 1, y: 0 }}
-//           exit={{ opacity: 0, y: 16 }}
-//           transition={{ duration: 0.25 }}
-//           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-//           aria-label="بازگشت به بالای صفحه"
-//           className="fixed bottom-6 left-6 z-[80] flex h-11 w-11 items-center justify-center rounded-full bg-[#1D4D3F] text-white shadow-lg shadow-[#1D4D3F]/20 transition hover:bg-[#14382E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CD9E6A]"
-//         >
-//           <ArrowUp size={18} strokeWidth={1.8} />
-//         </motion.button>
-//       )}
-//     </AnimatePresence>
-//   );
-// }
-
-// /* ─────────────────────── Special offer slider ─────────────────────── */
-
-// const offerItems = items.filter((i) => i.tag === "پرفروش");
-// const SLIDE_MS = 5500;
-
-// function SpecialOffer({ onSeeInMenu }: { onSeeInMenu: (category: string) => void }) {
-//   const reduce = useReducedMotion();
-//   const [index, setIndex] = useState(0);
-//   const item = offerItems[index];
-//   const categoryLabel = categories.find((c) => c.id === item.category)?.label;
-
-//   /* auto-advance; restarts whenever the slide changes (also after a manual click) */
-//   useEffect(() => {
-//     if (reduce) return;
-//     const t = setTimeout(() => setIndex((i) => (i + 1) % offerItems.length), SLIDE_MS);
-//     return () => clearTimeout(t);
-//   }, [index, reduce]);
-
-//   return (
-//     <section id="featured" aria-label="پیشنهاد ویژه" className="px-5 md:px-8">
-//       <div className="relative mx-auto max-w-6xl">
-//         <div className="relative overflow-hidden rounded-[40px] bg-[#1D4D3F] p-3 md:p-4">
-//           <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#CD9E6A]/[0.14] blur-[90px]" />
-
-//           <div className="relative grid gap-3 md:grid-cols-[1fr_340px] md:gap-6 lg:grid-cols-[1fr_400px]">
-//             {/* text */}
-//             <div className="flex flex-col justify-between p-5 md:min-h-[300px] md:p-8">
-//               <AnimatePresence mode="wait" initial={false}>
-//                 <motion.div
-//                   key={item.id}
-//                   initial={{ opacity: 0, y: 14 }}
-//                   animate={{ opacity: 1, y: 0 }}
-//                   exit={{ opacity: 0, y: -10 }}
-//                   transition={{ duration: 0.45, ease: EASE }}
-//                 >
-//                   <div className="flex items-center gap-3">
-//                     <span className="text-xs font-bold text-[#CD9E6A]">پیشنهاد ویژه</span>
-//                     <span className="h-px w-8 bg-[#CD9E6A]/50" />
-//                     <span className="text-xs text-white/45">{categoryLabel}</span>
-//                   </div>
-//                   <h2 className="mt-4 text-3xl font-light leading-snug text-white md:text-5xl">
-//                     {item.name}
-//                   </h2>
-//                   <p className="mt-3 line-clamp-2 max-w-sm text-sm leading-8 text-white/55">
-//                     {item.desc}
-//                   </p>
-//                   <div className="mt-5 flex items-baseline gap-2">
-//                     <span className="text-3xl font-light text-[#CD9E6A]">{item.price}</span>
-//                     <span className="text-xs text-white/40">تومان</span>
-//                   </div>
-//                 </motion.div>
-//               </AnimatePresence>
-
-//               <div className="mt-6 flex items-center justify-between gap-4">
-//                 <button
-//                   onClick={() => onSeeInMenu(item.category)}
-//                   className="group flex items-center gap-2.5 rounded-full bg-[#CD9E6A] px-6 py-3 text-xs font-bold text-[#14382E] transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-//                 >
-//                   دیدن در منو
-//                   <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-1" />
-//                 </button>
-
-//                 <div className="flex items-center gap-2" role="group" aria-label="انتخاب پیشنهاد">
-//                   {offerItems.map((o, i) => (
-//                     <button
-//                       key={o.id}
-//                       onClick={() => setIndex(i)}
-//                       aria-label={o.name}
-//                       aria-current={i === index}
-//                       className="flex items-center py-3"
-//                     >
-//                       <span
-//                         className={`relative block h-1 overflow-hidden rounded-full bg-white/20 transition-all duration-500 ${
-//                           i === index ? "w-10" : "w-4"
-//                         }`}
-//                       >
-//                         {i === index &&
-//                           (reduce ? (
-//                             <span className="absolute inset-0 bg-[#CD9E6A]" />
-//                           ) : (
-//                             <motion.span
-//                               key={index}
-//                               initial={{ width: 0 }}
-//                               animate={{ width: "100%" }}
-//                               transition={{ duration: SLIDE_MS / 1000, ease: "linear" }}
-//                               className="absolute inset-y-0 right-0 bg-[#CD9E6A]"
-//                             />
-//                           ))}
-//                       </span>
-//                     </button>
-//                   ))}
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* image */}
-//             <div className="relative order-first aspect-[4/3] overflow-hidden rounded-[30px] bg-[#14382E] md:order-none md:aspect-auto md:min-h-[300px]">
-//               <AnimatePresence initial={false}>
-//                 <motion.img
-//                   key={item.id}
-//                   src={large(item.image)}
-//                   alt={item.name}
-//                   initial={{ opacity: 0, scale: 1.08 }}
-//                   animate={{ opacity: 1, scale: 1 }}
-//                   exit={{ opacity: 0 }}
-//                   transition={{ duration: 0.9, ease: EASE }}
-//                   className="absolute inset-0 h-full w-full object-cover"
-//                 />
-//               </AnimatePresence>
-//               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F2A22]/35 via-transparent to-transparent" />
-//               <span className="absolute right-4 top-4 rounded-full bg-[#CD9E6A] px-3.5 py-1.5 text-[11px] font-bold text-white">
-//                 پرفروش
-//               </span>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="pointer-events-none absolute -inset-2 rounded-[48px] border border-[#CD9E6A]/30" />
-//       </div>
-//     </section>
-//   );
-// }
-
-// /* ─────────────────────── Main Page ─────────────────────── */
-
-// const heroArches = [
-//   {
-//     src: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800&q=85",
-//     alt: "Cappuccino",
-//     size: "w-[27vw] max-w-[230px] aspect-[2/3]",
-//     delay: 0.3,
-//   },
-//   {
-//     src: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=85",
-//     alt: "Coffee",
-//     size: "w-[35vw] max-w-[290px] aspect-[2/3.5]",
-//     delay: 0.1,
-//   },
-//   {
-//     src: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=800&q=85",
-//     alt: "Cheesecake",
-//     size: "w-[27vw] max-w-[230px] aspect-[2/3]",
-//     delay: 0.5,
-//   },
-// ];
-
-// export default function Home() {
-//   const [mobileMenu, setMobileMenu] = useState(false);
-//   const [scrolled, setScrolled] = useState(false);
-//   const [activeCat, setActiveCat] = useState(sections[0].id);
-//   const shouldReduceMotion = useReducedMotion();
-//   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-
-//   /* always start at the very top after a refresh */
-//   useEffect(() => {
-//     if ("scrollRestoration" in window.history) {
-//       window.history.scrollRestoration = "manual";
-//     }
-//     window.scrollTo(0, 0);
-//     const reset = () => window.scrollTo(0, 0);
-//     window.addEventListener("beforeunload", reset);
-//     return () => window.removeEventListener("beforeunload", reset);
-//   }, []);
-
-//   useEffect(() => {
-//     const onScroll = () => setScrolled(window.scrollY > 24);
-//     window.addEventListener("scroll", onScroll, { passive: true });
-//     onScroll();
-//     return () => window.removeEventListener("scroll", onScroll);
-//   }, []);
-
-//   /* scroll-spy: highlight the chapter currently on screen */
-//   useEffect(() => {
-//     const observer = new IntersectionObserver(
-//       (entries) => {
-//         entries.forEach((e) => {
-//           if (e.isIntersecting) setActiveCat(e.target.getAttribute("data-cat") ?? sections[0].id);
-//         });
-//       },
-//       { rootMargin: "-30% 0px -60% 0px" },
-//     );
-//     sections.forEach((c) => {
-//       const el = document.getElementById(`cat-${c.id}`);
-//       if (el) observer.observe(el);
-//     });
-//     return () => observer.disconnect();
-//   }, []);
-
-//   useEffect(() => {
-//     tabRefs.current[activeCat]?.scrollIntoView({
-//       inline: "center",
-//       block: "nearest",
-//       behavior: shouldReduceMotion ? "auto" : "smooth",
-//     });
-//   }, [activeCat, shouldReduceMotion]);
-
-//   const byCategory = useMemo(() => {
-//     const map: Record<string, Item[]> = {};
-//     items.forEach((i) => (map[i.category] = [...(map[i.category] ?? []), i]));
-//     return map;
-//   }, []);
-
-//   const goTo = (id: string) =>
-//     document
-//       .getElementById(`cat-${id}`)
-//       ?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth" });
-
-//   const scrollToMenu = () =>
-//     document
-//       .getElementById("menu")
-//       ?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth" });
-
-//   const heroIn = (delay: number) => ({
-//     initial: shouldReduceMotion ? false : { opacity: 0, y: 20 },
-//     animate: { opacity: 1, y: 0 },
-//     transition: { duration: 0.9, delay, ease: EASE },
-//   });
-
-//   return (
-//     <main id="home" dir="rtl" className="relative isolate min-h-screen overflow-x-clip text-[#1D4D3F]">
-//       {/* ───────────── BACKGROUND ───────────── */}
-//       <div
-//         aria-hidden
-//         className="pointer-events-none fixed inset-0 -z-20 bg-[#FBFAF7]"
-//         style={{
-//           backgroundImage:
-//             "radial-gradient(60% 45% at 100% 0%, rgba(205,158,106,0.18), transparent 70%), radial-gradient(50% 40% at 0% 45%, rgba(29,77,63,0.08), transparent 70%), radial-gradient(45% 35% at 100% 100%, rgba(205,158,106,0.12), transparent 70%)",
-//         }}
-//       />
-//       <div
-//         aria-hidden
-//         className="pointer-events-none fixed inset-0 -z-10"
-//         style={{
-//           backgroundImage: "radial-gradient(rgba(29,77,63,0.09) 1px, transparent 1px)",
-//           backgroundSize: "28px 28px",
-//           maskImage: "linear-gradient(to bottom, black, transparent 75%)",
-//           WebkitMaskImage: "linear-gradient(to bottom, black, transparent 75%)",
-//         }}
-//       />
-
-//       {/* ───────────── HEADER ───────────── */}
-//       <header
-//         className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-500 ${
-//           scrolled || mobileMenu
-//             ? "border-[#1D4D3F]/[0.07] bg-[#FBFAF7]/85 backdrop-blur-xl"
-//             : "border-transparent bg-transparent"
+//     <button
+//       onClick={onClick}
+//       aria-current={active ? "page" : undefined}
+//       className={`relative flex min-w-[85px] flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+//         active ? "text-[#173d32]" : "text-[#a0a59c] hover:text-[#173d32]"
+//       }`}
+//     >
+//       <span
+//         className={`relative grid h-9 w-12 place-items-center rounded-xl transition-all duration-300 ${
+//           active
+//             ? "bg-[#173d32] text-[#d6b27f] shadow-[0_4px_12px_rgba(23,61,50,.16)]"
+//             : ""
 //         }`}
 //       >
-//         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 md:px-8">
-//           <Logo />
-//           <nav className="hidden items-center gap-9 text-[13px] text-[#1D4D3F]/60 md:flex">
-//             {navLinks.map(([label, href]) => (
-//               <a key={href} href={href} className="transition hover:text-[#1D4D3F]">
-//                 {label}
-//               </a>
-//             ))}
-//           </nav>
-//           <div className="flex items-center gap-2">
-//             <a
-//               href="#contact"
-//               className="hidden rounded-full bg-[#1D4D3F] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#14382E] sm:block"
-//             >
-//               سفارش و رزرو
-//             </a>
-//             <button
-//               onClick={() => setMobileMenu(!mobileMenu)}
-//               aria-label="باز کردن منو"
-//               className="flex h-10 w-10 items-center justify-center rounded-full text-[#1D4D3F] md:hidden"
-//             >
-//               {mobileMenu ? <X size={20} /> : <MenuIcon size={20} />}
-//             </button>
-//           </div>
-//         </div>
+//         {icon}
 
-//         <AnimatePresence>
-//           {mobileMenu && (
-//             <motion.nav
-//               initial={{ height: 0, opacity: 0 }}
-//               animate={{ height: "auto", opacity: 1 }}
-//               exit={{ height: 0, opacity: 0 }}
-//               className="overflow-hidden md:hidden"
-//             >
-//               <div className="flex flex-col px-6 pb-3 text-sm">
-//                 {navLinks.map(([label, href]) => (
-//                   <a
-//                     key={href}
-//                     href={href}
-//                     onClick={() => setMobileMenu(false)}
-//                     className="border-b border-[#1D4D3F]/[0.06] py-4 text-[#1D4D3F]/70 last:border-0"
-//                   >
-//                     {label}
-//                   </a>
-//                 ))}
-//               </div>
-//             </motion.nav>
-//           )}
-//         </AnimatePresence>
-//       </header>
+//         {!!count && count > 0 && (
+//           <span className="absolute -right-1.5 -top-1.5 grid h-[17px] min-w-[17px] place-items-center rounded-full border-2 border-[#fbf8f2] bg-[#c69b65] px-1 text-[9px] font-bold text-[#173d32]">
+//             {fa(count)}
+//           </span>
+//         )}
+//       </span>
 
-//       {/* ───────────── HERO ───────────── */}
-//       <section className="px-5 pb-20 pt-32 text-center md:px-8 md:pb-24 md:pt-40">
-//         <div className="mx-auto max-w-6xl">
-//           <motion.p {...heroIn(0)} className="font-brand text-sm italic text-[#A07840]">
-//             Afroumarket Café
-//           </motion.p>
-//           <motion.h1
-//             {...heroIn(0.1)}
-//             className="mt-6 text-5xl font-light leading-[1.3] text-[#1D4D3F] md:text-8xl"
-//           >
-//             طعم لحظه‌های
-//             <br />
-//             ماندگار
-//           </motion.h1>
-//           <motion.p
-//             {...heroIn(0.2)}
-//             className="mx-auto mt-7 max-w-sm text-sm leading-9 text-[#1D4D3F]/55 md:text-base"
-//           >
-//             جایی برای مکث کردن و لذت بردن؛ از عطر قهوه تازه تا طعم دسرهای دست‌ساز.
-//           </motion.p>
-//           <motion.div {...heroIn(0.3)} className="mt-9 flex items-center justify-center gap-7">
-//             <button
-//               onClick={scrollToMenu}
-//               className="group flex items-center gap-3 rounded-full bg-[#1D4D3F] px-8 py-4 text-sm font-bold text-white transition hover:bg-[#14382E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CD9E6A]"
-//             >
-//               مشاهده منو
-//               <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
-//             </button>
-//             <a
-//               href="#about"
-//               className="border-b border-[#CD9E6A] pb-1 text-sm text-[#1D4D3F]/70 transition hover:text-[#1D4D3F]"
-//             >
-//               داستان ما
-//             </a>
-//           </motion.div>
+//       <span className={`text-[10px] transition-all ${
+//         active ? "font-bold" : "font-medium"
+//       }`}>
+//         {label}
+//       </span>
 
-//           {/* three arches */}
-//           <div className="mt-16 md:mt-24">
-//             <div className="flex items-end justify-center gap-4 md:gap-8">
-//               {heroArches.map((arch) => (
-//                 <motion.div
-//                   key={arch.alt}
-//                   initial={shouldReduceMotion ? false : { opacity: 0, y: 70 }}
-//                   animate={{ opacity: 1, y: 0 }}
-//                   transition={{ duration: 1.2, delay: arch.delay, ease: EASE }}
-//                   className={`relative ${arch.size}`}
-//                 >
-//                   <div className="h-full w-full overflow-hidden rounded-t-[999px] rounded-b-[20px] bg-[#F5F2ED]">
-//                     <img src={arch.src} alt={arch.alt} className="h-full w-full object-cover" />
-//                   </div>
-//                   <div className="pointer-events-none absolute -inset-2 rounded-t-[999px] rounded-b-[26px] border border-[#CD9E6A]/40" />
-//                 </motion.div>
-//               ))}
-//             </div>
-//             <div className="mx-auto mt-4 h-px w-full max-w-4xl bg-gradient-to-r from-transparent via-[#CD9E6A]/60 to-transparent" />
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* ───────────── SPECIAL OFFER (slider) ───────────── */}
-//       <SpecialOffer onSeeInMenu={goTo} />
-
-//       {/* ───────────── MENU ───────────── */}
-//       <section id="menu" className="px-5 pb-28 pt-24 md:px-8 md:pb-40 md:pt-32">
-//         <div className="mx-auto max-w-6xl">
-//           <div className="mb-10 text-center">
-//             <ArchMark className="mx-auto mb-6" />
-//             <h2 className="text-5xl font-light text-[#1D4D3F] md:text-7xl">منوی کافه</h2>
-//             <p className="mx-auto mt-5 max-w-sm text-sm leading-8 text-[#1D4D3F]/50">
-//               از قهوه‌های خوش‌عطر تا دسرهای دست‌ساز؛ انتخابی برای هر سلیقه.
-//             </p>
-//           </div>
-
-//           {/* sticky dock */}
-//           <div className="sticky top-[76px] z-40 mb-14 flex justify-center">
-//             <div className="max-w-full overflow-x-auto rounded-full bg-[#1D4D3F] p-1.5 shadow-[0_16px_38px_-14px_rgba(29,77,63,0.6)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-//               <div className="flex items-center gap-1">
-//                 {sections.map((c) => (
-//                   <button
-//                     key={c.id}
-//                     ref={(el) => {
-//                       tabRefs.current[c.id] = el;
-//                     }}
-//                     onClick={() => goTo(c.id)}
-//                     className={`relative isolate shrink-0 rounded-full px-6 py-2.5 text-[13px] transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#CD9E6A] ${
-//                       activeCat === c.id ? "font-bold text-[#1D4D3F]" : "text-white/70 hover:text-white"
-//                     }`}
-//                   >
-//                     {activeCat === c.id && (
-//                       <motion.span
-//                         layoutId="dockPill"
-//                         className="absolute inset-0 -z-10 rounded-full bg-[#FBFAF7]"
-//                         transition={{ type: "spring", stiffness: 380, damping: 32 }}
-//                       />
-//                     )}
-//                     {c.label}
-//                   </button>
-//                 ))}
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* chapters */}
-//           {sections.map((c) => {
-//             const list = byCategory[c.id] ?? [];
-//             return (
-//               <div key={c.id} id={`cat-${c.id}`} data-cat={c.id} className="scroll-mt-8 pb-24 last:pb-0">
-//                 <div className="mb-12 flex items-end justify-between gap-6 border-b border-[#CD9E6A]/30 pb-7">
-//                   <div>
-//                     <p className="font-brand text-lg italic text-[#A07840]">{chapterLatin[c.id]}</p>
-//                     <h3 className="mt-1 text-5xl font-light text-[#1D4D3F] md:text-7xl">{c.label}</h3>
-//                     <p className="mt-4 text-sm text-[#1D4D3F]/50">{chapterNote[c.id]}</p>
-//                   </div>
-//                   <span className="shrink-0 pb-1 text-xs text-[#A07840]">{fa(list.length)} مورد</span>
-//                 </div>
-
-//                 <div className="grid grid-cols-1 gap-x-8 gap-y-12 px-2 md:grid-cols-2 lg:grid-cols-3">
-//                   {list.map((item) => (
-//                     <MenuCard key={item.id} item={item} />
-//                   ))}
-//                 </div>
-//               </div>
-//             );
-//           })}
-
-//           <p className="mt-16 text-center text-[11px] text-[#1D4D3F]/35">
-//             قیمت‌ها به تومان هستند و ممکن است با تغییر فصل به‌روزرسانی شوند.
-//           </p>
-//         </div>
-//       </section>
-
-//       {/* ───────────── BLEND ───────────── */}
-//       <div className="pb-28 md:pb-40">
-//         <CoffeeBlendSelector />
-//       </div>
-
-//       {/* ───────────── ABOUT ───────────── */}
-//       <section id="about" className="px-5 pb-28 md:px-8 md:pb-40">
-//         <div className="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-2 lg:gap-24">
-//           <div className="relative mx-auto w-full max-w-sm lg:max-w-md">
-//             <div className="aspect-[3/4] overflow-hidden rounded-t-[999px] rounded-b-[36px] bg-[#F5F2ED]">
-//               <img
-//                 src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=900&q=85"
-//                 alt="Cafe interior"
-//                 className="h-full w-full object-cover"
-//               />
-//             </div>
-//             <div className="pointer-events-none absolute -inset-2 rounded-t-[999px] rounded-b-[44px] border border-[#CD9E6A]/35" />
-//             <img
-//               src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=500&q=85"
-//               alt="Coffee preparation"
-//               className="absolute -bottom-8 -left-5 h-44 w-32 rounded-t-[999px] rounded-b-[20px] border-[6px] border-[#FBFAF7] object-cover md:-left-10 md:h-56 md:w-40"
-//             />
-//           </div>
-
-//           <div>
-//             <ArchMark className="mb-6" />
-//             <h2 className="text-4xl font-light leading-[1.4] text-[#1D4D3F] md:text-6xl">
-//               بیشتر از یک کافه،
-//               <br />
-//               یک حس خوب
-//             </h2>
-//             <p className="mt-8 max-w-md text-sm leading-9 text-[#1D4D3F]/55">
-//               افرومارکت جایی است برای طعم‌های دوست‌داشتنی، دیدارهای صمیمی و لحظه‌هایی که
-//               دوست داریم کمی طولانی‌تر شوند. ما به کیفیت مواد اولیه، تازگی و جزئیات اهمیت
-//               می‌دهیم.
-//             </p>
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* ───────────── CONTACT (a doorway) ───────────── */}
-//       <section id="contact" className="px-5 pb-28 md:px-8 md:pb-36">
-//         <div className="relative mx-auto max-w-xl overflow-hidden rounded-t-[999px] rounded-b-[44px] bg-[#1D4D3F] px-7 pb-16 pt-44 text-center md:px-14 md:pt-56">
-//           <div className="pointer-events-none absolute inset-3 rounded-t-[999px] rounded-b-[34px] border border-[#CD9E6A]/30" />
-//           <div className="pointer-events-none absolute -top-20 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#CD9E6A]/[0.14] blur-[80px]" />
-
-//           <div className="relative">
-//             <h2 className="text-3xl font-light leading-[1.45] text-white md:text-5xl">
-//               آماده یک تجربه
-//               <br />
-//               خوشمزه هستید؟
-//             </h2>
-//             <p className="mx-auto mt-5 max-w-xs text-sm leading-8 text-white/55">
-//               برای رزرو میز، سفارش یا دریافت اطلاعات بیشتر با ما در ارتباط باشید.
-//             </p>
-//             <div className="mt-9 flex flex-wrap justify-center gap-3">
-//               <a
-//                 href="tel:02112345678"
-//                 className="flex items-center gap-3 rounded-full bg-[#CD9E6A] px-7 py-4 text-sm font-bold text-[#14382E] transition hover:bg-white"
-//               >
-//                 <Phone size={16} />
-//                 تماس با ما
-//               </a>
-//               <a
-//                 href="https://instagram.com/"
-//                 target="_blank"
-//                 rel="noreferrer"
-//                 className="rounded-full border border-white/25 px-7 py-4 text-sm font-bold text-white transition hover:bg-white/10"
-//               >
-//                 اینستاگرام
-//               </a>
-//             </div>
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* ───────────── FOOTER ───────────── */}
-//       <footer className="border-t border-[#1D4D3F]/[0.08] px-5 py-10 md:px-8">
-//         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 md:flex-row">
-//           <Logo />
-//           <div className="flex gap-8 text-xs text-[#1D4D3F]/55">
-//             <a href="#home" className="transition hover:text-[#1D4D3F]">خانه</a>
-//             <a href="#menu" className="transition hover:text-[#1D4D3F]">منو</a>
-//             <a href="#about" className="transition hover:text-[#1D4D3F]">درباره ما</a>
-//             <a href="#contact" className="transition hover:text-[#1D4D3F]">تماس</a>
-//           </div>
-//           <p className="text-[11px] text-[#1D4D3F]/35">Afroumarket © ۱۴۰۵</p>
-//         </div>
-//       </footer>
-
-//       <BackToTop />
-//     </main>
+//       {active && (
+//         <span className="absolute -bottom-[7px] h-[2px] w-5 rounded-full bg-[#c69b65]" />
+//       )}
+//     </button>
 //   );
 // }
 
 
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ArrowLeft, Menu as MenuIcon, X, Phone, ArrowUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import {
+  ArrowUp,
+  Bookmark,
+  ChevronLeft,
+  Clock3,
+  Coffee,
+  Grid2X2,
+  Heart,
+  MapPin,
+  Phone,
+  Search,
+  Send,
+  Sparkles,
+  Utensils,
+  X,
+} from "lucide-react";
+import { categories, menuItems, type MenuItem } from "@/data/menu";
 
-/* ─────────────────────── Types ─────────────────────── */
+type Tab = "menu" | "saved" | "cafe";
 
-type Tag = "پرفروش" | "جدید";
-
-interface Category {
-  id: string;
-  label: string;
-}
-
-interface Item {
-  id: string;
-  category: string;
-  name: string;
-  desc: string;
-  price: string;
-  image: string;
-  tag?: Tag;
-}
-
-/* ─────────────────────── Data ─────────────────────── */
-
-const categories: Category[] = [
-  { id: "all", label: "همه" },
-  { id: "coffee", label: "قهوه" },
-  { id: "drinks", label: "نوشیدنی" },
-  { id: "desserts", label: "دسر" },
-  { id: "food", label: "غذا" },
-];
-
-const img = (id: string) => `https://images.unsplash.com/${id}?w=500&q=80`;
-
-const items: Item[] = [
-  { id: "c1", category: "coffee", name: "اسپرسو", desc: "شوت غلیظ با عطر دانه‌های تازه و کرمای طلایی", price: "۸۵,۰۰۰", image: img("photo-1510707577719-ae7c14805e3a") },
-  { id: "c2", category: "coffee", name: "لاته افرومارکت", desc: "اسپرسو، شیر میکروفوم و یک لمسه وانیل", price: "۱۲۵,۰۰۰", tag: "پرفروش", image: img("photo-1461023058943-07fcbe16d735") },
-  { id: "c3", category: "coffee", name: "کاپوچینو", desc: "اسپرسو، شیر گرم و فوم ابریشمی", price: "۱۱۵,۰۰۰", image: img("photo-1572442388796-11668a67e53d") },
-  { id: "c4", category: "coffee", name: "کورتادو", desc: "اسپرسو و شیر گرم با تعادل کلاسیک", price: "۱۰۵,۰۰۰", tag: "جدید", image: img("photo-1509042239860-f550ce710b93") },
-  { id: "c5", category: "coffee", name: "آمریکانو", desc: "اسپرسو و آب داغ، طعمی ملایم و دلنشین", price: "۹۵,۰۰۰", image: img("photo-1497636577773-f1231844b336") },
-  { id: "c6", category: "coffee", name: "ماتشا لاته", desc: "چای سبز ژاپنی با شیر و عطر ملایم", price: "۱۴۵,۰۰۰", image: img("photo-1515823064-d6e0c04616a7") },
-  { id: "c7", category: "coffee", name: "موکا", desc: "ترکیب اسپرسو، شکلات و شیر بخارپز", price: "۱۳۵,۰۰۰", image: img("photo-1570968915860-54d5c301fa9f") },
-  { id: "d1", category: "drinks", name: "چای ایرانی", desc: "چای دم‌کرده با عطر بهاره و طعمی اصیل", price: "۳۰,۰۰۰", image: img("photo-1544787219-7f47ccb76574") },
-  { id: "d2", category: "drinks", name: "چای ترش", desc: "دمنوش خوش‌رنگ با طعمی متفاوت", price: "۵۵,۰۰۰", image: img("photo-1576092768241-dec231879fc3") },
-  { id: "d3", category: "drinks", name: "لیموناد خیار", desc: "لیمو، خیار، نعنا و طراوت یک روز تابستانی", price: "۸۰,۰۰۰", tag: "پرفروش", image: img("photo-1513558161293-cdaf765edfd4") },
-  { id: "d4", category: "drinks", name: "آب پرتقال", desc: "پرتقال تازه، بدون شکر افزوده", price: "۹۰,۰۰۰", image: img("photo-1600271886742-f049cd451bba") },
-  { id: "d5", category: "drinks", name: "اسموتی توت‌فرنگی", desc: "توت‌فرنگی، موز و ماست یونانی", price: "۱۲۵,۰۰۰", image: img("photo-1505252585461-04db1eb84625") },
-  { id: "d6", category: "drinks", name: "دمنوش زعفران", desc: "دمنوش زعفران با عطر گرم و دلنشین", price: "۷۰,۰۰۰", tag: "جدید", image: img("photo-1544787219-7f47ccb76574") },
-  { id: "s1", category: "desserts", name: "چیزکیک نیویورکی", desc: "چیزکیک کلاسیک با سس توت‌فرنگی", price: "۱۵۰,۰۰۰", tag: "پرفروش", image: img("photo-1533134242443-d4fd215305ad") },
-  { id: "s2", category: "desserts", name: "تیرامیسو", desc: "دسر ایتالیایی با قهوه و ماسکارپونه", price: "۱۶۵,۰۰۰", image: img("photo-1571877227200-a0d98ea607e9") },
-  { id: "s3", category: "desserts", name: "براونی با بستنی", desc: "براونی شکلاتی گرم با بستنی وانیلی", price: "۱۴۰,۰۰۰", image: img("photo-1606313564200-e75d5e30476c") },
-  { id: "s4", category: "desserts", name: "پنکیک", desc: "پنکیک خانگی با عسل و میوه تازه", price: "۱۳۵,۰۰۰", image: img("photo-1528207776546-365bb710ee93") },
-  { id: "s5", category: "desserts", name: "کرم بروله", desc: "دسر فرانسوی با کرم وانیلی لطیف", price: "۱۵۰,۰۰۰", image: img("photo-1488477181946-6428a0291777") },
-  { id: "s6", category: "desserts", name: "کیک شکلاتی", desc: "کیک شکلاتی با مغز نرم و غلیظ", price: "۱۴۵,۰۰۰", tag: "جدید", image: img("photo-1578985545062-69928b1d9587") },
-  { id: "f1", category: "food", name: "ساندویچ مرغ", desc: "مرغ گریل، سبزیجات تازه و سس مخصوص", price: "۱۸۰,۰۰۰", image: img("photo-1521390188846-e2a3a97453a0") },
-  { id: "f2", category: "food", name: "ساندویچ آووکادو", desc: "آووکادو، پنیر و سبزیجات تازه", price: "۱۶۵,۰۰۰", tag: "پرفروش", image: img("photo-1528735602780-2552fd46c7af") },
-  { id: "f3", category: "food", name: "پیتزا مارگاریتا", desc: "سس گوجه، موزارلا و رزماری", price: "۲۲۰,۰۰۰", image: img("photo-1574071318508-1cdbab80d002") },
-  { id: "f4", category: "food", name: "پاستا آلفردو", desc: "پاستا با سس خامه‌ای و مرغ", price: "۲۰۰,۰۰۰", image: img("photo-1645112411341-6c4fd023714a") },
-  { id: "f5", category: "food", name: "سالاد سزار", desc: "کاهو، مرغ گریل، کروتون و سس سزار", price: "۱۷۵,۰۰۰", image: img("photo-1546793665-c74683f339c1") },
-  { id: "f6", category: "food", name: "سوپ روز", desc: "سوپ فصل با نان تست تازه", price: "۱۲۰,۰۰۰", tag: "جدید", image: img("photo-1547592166-23ac45744acd") },
-];
-
-const coffeeBlends = [
-  { id: "50/50", label: "۵۰ / ۵۰", title: "متعادل و کلاسیک", description: "ترکیبی متعادل با طعمی دلنشین، مناسب برای مصرف روزانه.", body: 75, acidity: 55, aroma: 70, arabica: "50%", robusta: "50%" },
-  { id: "70/30", label: "۷۰ / ۳۰", title: "ملایم و خوش‌عطر", description: "عطر بیشتر، تلخی کنترل‌شده و تجربه‌ای لطیف‌تر.", body: 65, acidity: 75, aroma: 90, arabica: "70%", robusta: "30%" },
-  { id: "100%", label: "۱۰۰٪ عربیکا", title: "خالص و اصیل", description: "۱۰۰٪ عربیکا؛ عطری پیچیده‌تر و طعمی ظریف و خاص.", body: 55, acidity: 90, aroma: 95, arabica: "100%", robusta: "0%" },
-];
-
-const navLinks = [
-  ["خانه", "#home"],
-  ["پیشنهاد ویژه", "#featured"],
-  ["منو", "#menu"],
-  ["ترکیب قهوه", "#blend"],
-  ["درباره ما", "#about"],
-  ["تماس", "#contact"],
-];
-
-const sections = categories.filter((c) => c.id !== "all");
-
-const chapterNote: Record<string, string> = {
-  coffee: "اسپرسو، شیر و دانه‌های تازه",
-  drinks: "دمنوش، آب‌میوه و نوشیدنی‌های خنک",
-  desserts: "شیرینی‌های دست‌ساز برای بعد از قهوه",
-  food: "سبک و سیر، برای هر ساعت از روز",
+const categoryIcons: Record<string, ReactNode> = {
+  همه: <Grid2X2 size={15} strokeWidth={1.8} />,
+  "پیش‌غذا": <Utensils size={15} strokeWidth={1.8} />,
+  سالاد: <Heart size={15} strokeWidth={1.8} />,
+  پاستا: <Utensils size={15} strokeWidth={1.8} />,
+  "غذای اصلی": <Utensils size={15} strokeWidth={1.8} />,
+  پیتزا: <Grid2X2 size={15} strokeWidth={1.8} />,
+  عصرانه: <Coffee size={15} strokeWidth={1.8} />,
+  "اسپرسو بار": <Coffee size={15} strokeWidth={1.8} />,
+  "نوشیدنی گرم": <Coffee size={15} strokeWidth={1.8} />,
+  "سرد کافئین‌دار": <Coffee size={15} strokeWidth={1.8} />,
+  "شیک و اسموتی": <Coffee size={15} strokeWidth={1.8} />,
+  "دمی بار": <Coffee size={15} strokeWidth={1.8} />,
 };
 
-const chapterLatin: Record<string, string> = {
-  coffee: "Coffee",
-  drinks: "Refreshers",
-  desserts: "Desserts",
-  food: "Kitchen",
-};
+const fa = (n: number) => new Intl.NumberFormat("fa-IR").format(n);
 
-const EASE = [0.22, 1, 0.36, 1] as const;
-const fa = (n: number) => n.toLocaleString("fa-IR");
-const large = (src: string) => src.replace("w=500", "w=900");
-
-/* ─────────────────────── Small pieces ─────────────────────── */
-
-function Logo({ light = false }: { light?: boolean }) {
-  return (
-    <a href="#home" className="flex items-baseline gap-1.5" aria-label="Afroumarket">
-      <span
-        className={`font-brand text-[21px] font-semibold tracking-wide ${
-          light ? "text-white" : "text-[#1D4D3F]"
-        }`}
-      >
-        Afroumarket
-      </span>
-      <span className="h-1 w-1 rounded-full bg-[#CD9E6A]" />
-    </a>
-  );
+function formatPrice(value: string) {
+  const n = Number(value);
+  return Number.isFinite(n) ? fa(n) : value;
 }
 
-/** the arch (طاق) — the shape this whole page is built around */
-function ArchMark({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden
-      width="26"
-      height="34"
-      viewBox="0 0 26 34"
-      fill="none"
-      className={className}
-    >
-      <path d="M2 33V13a11 11 0 0 1 22 0v20" stroke="#CD9E6A" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
+const realCategories = categories.filter((c) => c !== "همه");
 
-function MenuCard({ item }: { item: Item }) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.8, ease: EASE }}
-      className="group relative"
-    >
-      {/* soft square */}
-      <div className="relative aspect-square overflow-hidden rounded-[40px] bg-[#F5F2ED]">
-        <img
-          src={large(item.image)}
-          alt={item.name}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.06]"
-        />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F2A22]/45 via-transparent to-transparent" />
+export default function HomePage() {
+  const [activeCategory, setActiveCategory] = useState("همه");
+  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<Tab>("menu");
+  const [saved, setSaved] = useState<number[]>([]);
+  const [ready, setReady] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
-        {item.tag && (
-          <span
-            className={`absolute right-4 top-4 rounded-full px-3.5 py-1.5 text-[11px] font-bold backdrop-blur-md ${
-              item.tag === "پرفروش" ? "bg-[#CD9E6A] text-white" : "bg-white/90 text-[#1D4D3F]"
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 350);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("afour_saved_items");
+      if (raw) setSaved(JSON.parse(raw));
+    } catch {
+      setSaved([]);
+    }
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (ready) {
+      localStorage.setItem("afour_saved_items", JSON.stringify(saved));
+    }
+  }, [saved, ready]);
+
+  const normalizedQuery = query.trim().toLocaleLowerCase("fa");
+
+  const visibleItems = useMemo(() => {
+    const source =
+      tab === "saved"
+        ? menuItems.filter((item) => saved.includes(item.id))
+        : menuItems;
+
+    return source.filter((item) => {
+      const categoryMatch =
+        tab === "saved" ||
+        !!normalizedQuery ||
+        activeCategory === "همه" ||
+        item.category === activeCategory;
+
+      const searchMatch =
+        !normalizedQuery ||
+        `${item.title} ${item.description} ${item.category}`
+          .toLocaleLowerCase("fa")
+          .includes(normalizedQuery);
+
+      return categoryMatch && searchMatch;
+    });
+  }, [activeCategory, normalizedQuery, saved, tab]);
+
+  const grouped = useMemo(() => {
+    if (tab !== "menu" || normalizedQuery || activeCategory !== "همه") {
+      return null;
+    }
+
+    return realCategories
+      .map((name) => ({
+        name,
+        items: visibleItems.filter((item) => item.category === name),
+      }))
+      .filter((group) => group.items.length);
+  }, [tab, normalizedQuery, activeCategory, visibleItems]);
+
+  const toggleSaved = (id: number) => {
+    setSaved((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
+    );
+  };
+
+  const changeTab = (next: Tab) => {
+    setTab(next);
+    setQuery("");
+    if (next === "menu") setActiveCategory("همه");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const selectCategory = (name: string) => {
+    setActiveCategory(name);
+    setQuery("");
+  };
+
+  const sectionTitle =
+    tab === "saved"
+      ? "انتخاب‌های شما"
+      : normalizedQuery
+        ? "نتایج جست‌وجو"
+        : activeCategory === "همه"
+          ? "طعم‌های A.Four"
+          : activeCategory;
+
+  return (
+    <main dir="rtl" className="afour-root min-h-screen bg-[#e4dcd0] text-[#1a3a2f]">
+      <div className="relative mx-auto min-h-screen w-full max-w-[600px] overflow-x-clip bg-[#f8f4ec] shadow-[0_0_120px_rgba(10,30,22,0.18)]">
+
+        {/* ─── GLOBAL STYLES ─── */}
+        <style>{`
+          .afour-root {
+            font-family: Vazirmatn, system-ui, -apple-system, sans-serif;
+          }
+          @keyframes afourFadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes afourPulse {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0.4; }
+          }
+          .fade-in { animation: afourFadeUp 480ms cubic-bezier(0.22, 0.68, 0.31, 1) both; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+          @media (prefers-reduced-motion: reduce) {
+            .fade-in { animation: none; }
+          }
+        `}</style>
+
+        {/* ═══════════════ HERO ═══════════════ */}
+        <section className="relative overflow-hidden">
+          {/* ambient glow */}
+          <div className="pointer-events-none absolute -top-32 left-1/2 h-[280px] w-[420px] -translate-x-1/2 rounded-full bg-[#c69b65]/8 blur-[80px]" />
+          <div className="pointer-events-none absolute -left-20 top-20 h-40 w-40 rounded-full border border-[#c69b65]/12" />
+          <div className="pointer-events-none absolute -left-10 top-30 h-24 w-24 rounded-full border border-dashed border-[#c69b65]/8" />
+
+          <div className="relative px-5 pb-8 pt-6 sm:px-7 sm:pb-10 sm:pt-8">
+
+            {/* top bar */}
+            <header className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-[#1a3a2f] shadow-[0_4px_14px_rgba(26,58,47,0.25)]">
+                  <span className="font-brand text-[15px] font-bold italic tracking-tight text-[#d6b27f]">A4</span>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-brand text-[30px] font-semibold italic leading-none tracking-tight text-[#1a3a2f]">
+                      A.Four
+                    </span>
+                    <span className="hidden text-[8px] font-semibold tracking-[0.22em] text-[#a07840] sm:inline">
+                      FOOD MARKET
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[10px] font-light tracking-wide text-[#8b9185]">
+                    یک انتخاب خوش‌طعم، برای هر لحظه
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-full border border-[#ddd4c4] bg-white/70 px-3 py-2 shadow-sm backdrop-blur-sm">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#6b8f65] opacity-40" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#6b8f65]" />
+                </span>
+                <span dir="ltr" className="text-[10px] font-semibold tracking-wide text-[#4d6b55]">
+                  17:00 – 24:00
+                </span>
+              </div>
+            </header>
+
+            {/* hero card */}
+            {/* <div className="relative mt-7 overflow-hidden rounded-[28px] bg-[#1a3a2f] px-6 py-7 text-[#fdf9f0] shadow-[0_20px_60px_rgba(26,58,47,0.3)] ring-1 ring-white/8 sm:px-8 sm:py-9">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(214,178,127,0.12),transparent_50%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(214,178,127,0.08),transparent_40%)]" />
+              <div className="pointer-events-none absolute -left-16 -top-16 h-52 w-52 rounded-full border border-[#d6b27f]/12" />
+              <div className="pointer-events-none absolute -left-8 -top-8 h-36 w-36 rounded-full border border-dashed border-[#d6b27f]/8" />
+              <div className="pointer-events-none absolute -bottom-20 right-16 h-44 w-44 rounded-full bg-[#d6b27f]/6 blur-3xl" />
+
+              <div className="relative flex items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-[#d6b27f]/20 bg-[#d6b27f]/8 px-3 py-1.5">
+                    <Sparkles size={11} className="text-[#d6b27f]" />
+                    <span className="text-[8px] font-semibold tracking-[0.24em] text-[#d6b27f]">
+                      THE A.FOUR MENU
+                    </span>
+                  </div>
+
+                  <h1 className="text-[30px] font-bold leading-[1.6] tracking-tight sm:text-[36px]">
+                    خوش‌طعم‌تر
+                    <br />
+                    <span className="font-light text-[#d6b27f]">از چیزی که فکر می‌کنی.</span>
+                  </h1>
+
+                  <p className="mt-3 max-w-[280px] text-[10px] font-light leading-7 text-white/55 sm:text-[11px]">
+                    از اولین انتخاب تا آخرین لقمه؛ چیزی برای لذت بردن پیدا می‌کنی.
+                  </p>
+                </div>
+
+                <div className="mb-1 hidden shrink-0 sm:block" dir="ltr">
+                  <span className="block font-brand text-[62px] font-semibold italic leading-none text-[#d6b27f]/80">
+                    04
+                  </span>
+                  <span className="mt-1.5 block text-[7px] tracking-[0.28em] text-white/30">
+                    GOOD TASTE
+                  </span>
+                </div>
+
+                <div className="mb-1 grid h-[64px] w-[64px] shrink-0 place-items-center rounded-full border border-[#d6b27f]/30 bg-white/5 sm:hidden">
+                  <span className="font-brand text-[24px] font-semibold italic text-[#d6b27f]">A4</span>
+                </div>
+              </div>
+
+              <div className="relative mt-6 flex items-center justify-between border-t border-white/8 pt-4">
+                <span className="text-[8px] tracking-[0.18em] text-white/35">
+                  MADE FOR YOUR GOOD MOMENTS
+                </span>
+                <span className="font-brand text-[12px] italic text-[#d6b27f]/70">
+                  Est. A.Four
+                </span>
+              </div>
+            </div> */}
+
+            {tab !== "cafe" && (
+              <div className="mt-5">
+                <label className="group flex h-[56px] items-center gap-3 rounded-[20px] border border-[#e2d9c9] bg-white/85 px-3.5 shadow-[0_6px_20px_rgba(26,58,47,0.05)] transition-all duration-300 focus-within:border-[#c69b65] focus-within:shadow-[0_8px_28px_rgba(198,155,101,0.12)]">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-[#f0e9dd] text-[#98703f] transition-colors duration-300 group-focus-within:bg-[#1a3a2f] group-focus-within:text-[#d6b27f]">
+                    <Search size={17} strokeWidth={1.8} />
+                  </div>
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="دنبال چه طعمی می‌گردی؟"
+                    className="h-full min-w-0 flex-1 bg-transparent text-[12px] font-medium text-[#1a3a2f] outline-none placeholder:font-light placeholder:text-[#b0ad9f]"
+                  />
+                  {query ? (
+                    <button
+                      type="button"
+                      onClick={() => setQuery("")}
+                      aria-label="پاک کردن جست‌وجو"
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#8c9388] transition hover:bg-[#f0e9dd] hover:text-[#1a3a2f]"
+                    >
+                      <X size={15} />
+                    </button>
+                  ) : (
+                    <span className="shrink-0 text-[8px] font-semibold tracking-[0.2em] text-[#c0a882]">
+                      SEARCH
+                    </span>
+                  )}
+                </label>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ═══════════════ STICKY CATEGORIES ═══════════════ */}
+        {tab === "menu" && (
+          <div className="sticky top-0 z-40 border-b border-[#e6dccb]/70 bg-[#f8f4ec]/92 shadow-[0_6px_20px_rgba(26,58,47,0.06)] backdrop-blur-2xl">
+            <div className="flex items-center gap-3 px-5 pb-3 pt-3 sm:px-7">
+              <div className="flex shrink-0 flex-col items-start">
+                <span className="text-[10px] font-bold text-[#1a3a2f]">دسته‌ها</span>
+                <span className="mt-0.5 text-[7px] font-medium tracking-[0.18em] text-[#b08a56]">MENU</span>
+              </div>
+              <div className="h-7 w-px shrink-0 bg-[#e4d9c7]" />
+
+              <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-0.5">
+                {categories.map((category) => {
+                  const active = activeCategory === category;
+                  return (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => selectCategory(category)}
+                      aria-pressed={active}
+                      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[10px] font-semibold transition-all duration-300 ${
+                        active
+                          ? "border-transparent bg-[#1a3a2f] text-[#fdf9f0] shadow-[0_4px_14px_rgba(26,58,47,0.2)]"
+                          : "border-[#e6dccb] bg-white/60 text-[#6b7a6e] hover:border-[#c69b65]/50 hover:bg-white hover:text-[#1a3a2f]"
+                      }`}
+                    >
+                      <span className={active ? "text-[#d6b27f]" : "text-[#a07840]/60"}>
+                        {categoryIcons[category] ?? <Utensils size={14} />}
+                      </span>
+                      <span className="whitespace-nowrap">{category}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════ MAIN CONTENT ═══════════════ */}
+        {tab === "cafe" ? (
+          <CafeInfo />
+        ) : (
+          <section className="px-5 pb-40 pt-8 sm:px-7">
+
+            {/* section header */}
+            <div className="mb-5 flex items-end justify-between gap-3">
+              <div className="min-w-0">
+                <span className="mb-2 inline-flex items-center gap-1.5 text-[8px] font-medium tracking-[0.22em] text-[#a07840]">
+                  <Sparkles size={10} />
+                  {tab === "saved" ? "YOUR COLLECTION" : "A.FOUR SELECTION"}
+                </span>
+                <h2 className="text-[24px] font-bold leading-tight text-[#1a3a2f]">{sectionTitle}</h2>
+              </div>
+              <div className="flex shrink-0 flex-col items-center rounded-xl border border-[#e6dccb] bg-white/60 px-3 py-1.5">
+                <span className="font-brand text-[22px] italic leading-none text-[#c69b65]">
+                  {fa(visibleItems.length)}
+                </span>
+                <span className="mt-0.5 text-[8px] text-[#879087]">آیتم</span>
+              </div>
+            </div>
+
+            {/* divider */}
+            <div className="mb-6 flex items-center gap-3">
+              <div className="h-[2px] w-8 rounded-full bg-gradient-to-l from-[#c69b65] to-[#c69b65]/40" />
+              <div className="h-px flex-1 bg-gradient-to-l from-[#e6dccb] to-transparent" />
+            </div>
+
+            {/* content */}
+            {visibleItems.length === 0 ? (
+              <EmptyState saved={tab === "saved"} onBack={() => changeTab("menu")} />
+            ) : grouped ? (
+              <div key="all" className="fade-in space-y-11">
+                {grouped.map((group, index) => (
+                  <section key={group.name}>
+                    <div className="mb-4 flex items-center gap-3">
+                      <span className="font-brand text-[13px] italic text-[#c69b65]/70">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <h3 className="text-[15px] font-bold text-[#1a3a2f]">{group.name}</h3>
+                      <div className="h-px flex-1 bg-[#e6dccb]" />
+                      <span className="text-[9px] font-medium text-[#a07840]">
+                        {fa(group.items.length)} محصول
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5">
+                      {group.items.map((item) => (
+                        <MenuCard
+                          key={item.id}
+                          item={item}
+                          saved={saved.includes(item.id)}
+                          onToggle={() => toggleSaved(item.id)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <div
+                key={`${tab}-${activeCategory}-${normalizedQuery}`}
+                className="fade-in grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5"
+              >
+                {visibleItems.map((item) => (
+                  <MenuCard
+                    key={item.id}
+                    item={item}
+                    saved={saved.includes(item.id)}
+                    onToggle={() => toggleSaved(item.id)}
+                    showCategory={tab === "saved" || !!normalizedQuery}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* footer note */}
+            {visibleItems.length > 0 && (
+              <div className="mt-12 flex flex-col items-center">
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="h-px w-10 bg-gradient-to-l from-transparent to-[#d6b27f]/40" />
+                  <span className="font-brand text-[20px] italic text-[#c69b65]/80">A.Four</span>
+                  <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#d6b27f]/40" />
+                </div>
+                <p className="text-[10px] font-light text-[#9a9589]">
+                  قیمت‌ها به هزار تومان است.
+                </p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ═══════════════ SCROLL TO TOP ═══════════════ */}
+        <div className="pointer-events-none fixed bottom-[100px] left-1/2 z- w-full max-w-[600px] -translate-x-1/2 px-5">
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label="بازگشت به بالای صفحه"
+            className={`pointer-events-auto ml-auto grid h-11 w-11 place-items-center rounded-full border border-[#d6b27f]/30 bg-[#1a3a2f]/95 text-[#d6b27f] shadow-[0_8px_24px_rgba(26,58,47,0.3)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-0.5 hover:bg-[#c69b65] hover:text-[#1a3a2f] hover:shadow-[0_10px_30px_rgba(198,155,101,0.35)] ${
+              showScrollTop
+                ? "translate-y-0 scale-100 opacity-100"
+                : "pointer-events-none translate-y-4 scale-75 opacity-0"
             }`}
           >
-            {item.tag}
-          </span>
-        )}
-      </div>
-
-      {/* gold outline, one step out */}
-      <div className="pointer-events-none absolute -inset-2 rounded-[48px] border border-[#CD9E6A]/30 transition-colors duration-700 group-hover:border-[#CD9E6A]/70" />
-
-      {/* glass label */}
-      <div className="absolute inset-x-3 bottom-3 rounded-[28px] bg-[#FCF8F1]/90 p-5 shadow-[0_18px_40px_-20px_rgba(15,42,34,0.5)] ring-1 ring-[#E8D5BC]/70 backdrop-blur-xl sm:p-6">
-        <div className="flex items-baseline justify-between gap-4">
-          <h3 className="text-lg font-bold text-[#1D4D3F] sm:text-xl">{item.name}</h3>
-          <div className="flex shrink-0 items-baseline gap-1">
-            <span className="text-lg font-extrabold text-[#A07840] sm:text-xl">{item.price}</span>
-            <span className="text-[10px] text-[#1D4D3F]/45">تومان</span>
-          </div>
-        </div>
-        <p className="mt-2 line-clamp-2 text-xs leading-6 text-[#1D4D3F]/55 sm:text-[13px]">
-          {item.desc}
-        </p>
-      </div>
-    </motion.article>
-  );
-}
-
-function CoffeeBlendSelector() {
-  const [selected, setSelected] = useState("70/30");
-  const active = coffeeBlends.find((b) => b.id === selected) ?? coffeeBlends[1];
-
-  return (
-    <section id="blend" className="px-5 md:px-8">
-      <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[36px] bg-[#1D4D3F] px-6 py-16 md:px-16 md:py-24">
-        <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[#CD9E6A]/[0.12] blur-[90px]" />
-
-        <div className="relative mx-auto max-w-3xl">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-light text-white md:text-5xl">ترکیب قهوه‌ات را انتخاب کن</h2>
-            <p className="mt-4 text-sm text-white/50">هر ترکیب، تجربه‌ای متفاوت از طعم و عطر</p>
-          </div>
-
-          <div className="mx-auto grid max-w-xl grid-cols-3 border-b border-white/15">
-            {coffeeBlends.map((blend) => (
-              <button
-                key={blend.id}
-                onClick={() => setSelected(blend.id)}
-                className={`relative py-4 text-sm transition-colors duration-300 ${
-                  selected === blend.id ? "font-bold text-white" : "text-white/45 hover:text-white/80"
-                }`}
-              >
-                {blend.label}
-                {selected === blend.id && (
-                  <motion.span
-                    layoutId="blendUnderline"
-                    className="absolute inset-x-6 -bottom-px h-[2px] bg-[#CD9E6A]"
-                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.3, ease: EASE }}
-              className="mx-auto mt-12 grid max-w-xl gap-10 md:grid-cols-2 md:gap-14"
-            >
-              <div>
-                <h3 className="text-xl font-bold text-white">{active.title}</h3>
-                <p className="mt-3 text-sm leading-8 text-white/55">{active.description}</p>
-                <div className="mt-6 flex gap-10">
-                  <div>
-                    <p className="text-xs text-white/40">عربیکا</p>
-                    <p className="mt-1 text-2xl font-light text-[#CD9E6A]" dir="ltr">{active.arabica}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/40">روبوستا</p>
-                    <p className="mt-1 text-2xl font-light text-[#CD9E6A]" dir="ltr">{active.robusta}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6 self-center">
-                {[
-                  { label: "بدنه", value: active.body },
-                  { label: "اسیدیته", value: active.acidity },
-                  { label: "عطر", value: active.aroma },
-                ].map((row) => (
-                  <div key={row.label}>
-                    <div className="mb-2 flex justify-between text-xs">
-                      <span className="text-white/70">{row.label}</span>
-                      <span className="text-[#CD9E6A]">{row.value}%</span>
-                    </div>
-                    <div className="h-px bg-white/15">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${row.value}%` }}
-                        transition={{ duration: 0.8, ease: EASE }}
-                        className="h-[2px] -translate-y-px rounded-full bg-[#CD9E6A]"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BackToTop() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 400);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <AnimatePresence>
-      {visible && (
-        <motion.button
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 16 }}
-          transition={{ duration: 0.25 }}
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          aria-label="بازگشت به بالای صفحه"
-          className="fixed bottom-6 left-6 z-[80] flex h-11 w-11 items-center justify-center rounded-full bg-[#1D4D3F] text-white shadow-lg shadow-[#1D4D3F]/20 transition hover:bg-[#14382E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CD9E6A]"
-        >
-          <ArrowUp size={18} strokeWidth={1.8} />
-        </motion.button>
-      )}
-    </AnimatePresence>
-  );
-}
-
-/* ─────────────────────── Special offer slider ─────────────────────── */
-
-const offerItems = items.filter((i) => i.tag === "پرفروش");
-const SLIDE_MS = 5500;
-
-function SpecialOffer({ onSeeInMenu }: { onSeeInMenu: (category: string) => void }) {
-  const reduce = useReducedMotion();
-  const [index, setIndex] = useState(0);
-  const item = offerItems[index];
-  const categoryLabel = categories.find((c) => c.id === item.category)?.label;
-
-  /* auto-advance; restarts whenever the slide changes (also after a manual click) */
-  useEffect(() => {
-    if (reduce) return;
-    const t = setTimeout(() => setIndex((i) => (i + 1) % offerItems.length), SLIDE_MS);
-    return () => clearTimeout(t);
-  }, [index, reduce]);
-
-  return (
-    <section id="featured" aria-label="پیشنهاد ویژه" className="px-5 md:px-8">
-      <div className="relative mx-auto max-w-5xl">
-        <div className="relative overflow-hidden rounded-[36px] bg-[#1D4D3F] p-2.5 shadow-[0_30px_60px_-35px_rgba(29,77,63,0.6)] md:p-3">
-          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#CD9E6A]/[0.15] blur-[80px]" />
-
-          <div className="relative grid gap-2.5 md:grid-cols-[1fr_280px] md:gap-5 lg:grid-cols-[1fr_320px]">
-            {/* text */}
-            <div className="flex flex-col justify-between gap-5 p-4 md:min-h-[210px] md:py-5 md:pr-7">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.45, ease: EASE }}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-[#CD9E6A]">پیشنهاد ویژه</span>
-                    <span className="h-px w-8 bg-[#CD9E6A]/50" />
-                    <span className="text-xs text-white/45">{categoryLabel}</span>
-                  </div>
-                  <h2 className="mt-3 text-3xl font-light leading-snug text-white md:text-4xl">
-                    {item.name}
-                  </h2>
-                  <p className="mt-2 line-clamp-2 max-w-sm text-[13px] leading-7 text-white/55">
-                    {item.desc}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
-
-              <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
-                <div className="flex items-center gap-5">
-                  <div className="flex items-baseline gap-1.5">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.span
-                        key={item.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="text-2xl font-light text-[#CD9E6A]"
-                      >
-                        {item.price}
-                      </motion.span>
-                    </AnimatePresence>
-                    <span className="text-[11px] text-white/40">تومان</span>
-                  </div>
-                  <button
-                    onClick={() => onSeeInMenu(item.category)}
-                    className="group flex items-center gap-2 rounded-full bg-[#CD9E6A] px-5 py-2.5 text-xs font-bold text-[#14382E] transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  >
-                    دیدن در منو
-                    <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2" role="group" aria-label="انتخاب پیشنهاد">
-                  {offerItems.map((o, i) => (
-                    <button
-                      key={o.id}
-                      onClick={() => setIndex(i)}
-                      aria-label={o.name}
-                      aria-current={i === index}
-                      className="flex items-center py-3"
-                    >
-                      <span
-                        className={`relative block h-1 overflow-hidden rounded-full bg-white/20 transition-all duration-500 ${
-                          i === index ? "w-10" : "w-4"
-                        }`}
-                      >
-                        {i === index &&
-                          (reduce ? (
-                            <span className="absolute inset-0 bg-[#CD9E6A]" />
-                          ) : (
-                            <motion.span
-                              key={index}
-                              initial={{ width: 0 }}
-                              animate={{ width: "100%" }}
-                              transition={{ duration: SLIDE_MS / 1000, ease: "linear" }}
-                              className="absolute inset-y-0 right-0 bg-[#CD9E6A]"
-                            />
-                          ))}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* image */}
-            <div className="relative order-first aspect-[16/9] overflow-hidden rounded-[26px] bg-[#14382E] md:order-none md:aspect-auto md:min-h-[210px]">
-              <AnimatePresence initial={false}>
-                <motion.img
-                  key={item.id}
-                  src={large(item.image)}
-                  alt={item.name}
-                  initial={{ opacity: 0, scale: 1.08 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.9, ease: EASE }}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              </AnimatePresence>
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F2A22]/35 via-transparent to-transparent" />
-              <span className="absolute right-3.5 top-3.5 rounded-full bg-[#CD9E6A] px-3 py-1 text-[10px] font-bold text-white">
-                پرفروش
-              </span>
-            </div>
-          </div>
+            <ArrowUp size={18} strokeWidth={1.8} />
+          </button>
         </div>
 
-        <div className="pointer-events-none absolute -inset-2 rounded-[44px] border border-[#CD9E6A]/30" />
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────── Main Page ─────────────────────── */
-
-const heroArches = [
-  {
-    src: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800&q=85",
-    alt: "Cappuccino",
-    size: "w-[27vw] max-w-[230px] aspect-[2/3]",
-    delay: 0.3,
-  },
-  {
-    src: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=85",
-    alt: "Coffee",
-    size: "w-[35vw] max-w-[290px] aspect-[2/3.5]",
-    delay: 0.1,
-  },
-  {
-    src: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=800&q=85",
-    alt: "Cheesecake",
-    size: "w-[27vw] max-w-[230px] aspect-[2/3]",
-    delay: 0.5,
-  },
-];
-
-export default function Home() {
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [activeCat, setActiveCat] = useState(sections[0].id);
-  const shouldReduceMotion = useReducedMotion();
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-
-  /* always start at the very top after a refresh */
-  useEffect(() => {
-    if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
-    }
-    window.scrollTo(0, 0);
-    const reset = () => window.scrollTo(0, 0);
-    window.addEventListener("beforeunload", reset);
-    return () => window.removeEventListener("beforeunload", reset);
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  /* scroll-spy: highlight the chapter currently on screen */
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActiveCat(e.target.getAttribute("data-cat") ?? sections[0].id);
-        });
-      },
-      { rootMargin: "-30% 0px -60% 0px" },
-    );
-    sections.forEach((c) => {
-      const el = document.getElementById(`cat-${c.id}`);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    tabRefs.current[activeCat]?.scrollIntoView({
-      inline: "center",
-      block: "nearest",
-      behavior: shouldReduceMotion ? "auto" : "smooth",
-    });
-  }, [activeCat, shouldReduceMotion]);
-
-  const byCategory = useMemo(() => {
-    const map: Record<string, Item[]> = {};
-    items.forEach((i) => (map[i.category] = [...(map[i.category] ?? []), i]));
-    return map;
-  }, []);
-
-  const goTo = (id: string) =>
-    document
-      .getElementById(`cat-${id}`)
-      ?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth" });
-
-  const scrollToMenu = () =>
-    document
-      .getElementById("menu")
-      ?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth" });
-
-  const heroIn = (delay: number) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.9, delay, ease: EASE },
-  });
-
-  return (
-    <main id="home" dir="rtl" className="relative isolate min-h-screen overflow-x-clip text-[#1D4D3F]">
-      {/* ───────────── BACKGROUND: quiet warm cream + paper grain ───────────── */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 -z-20"
-        style={{
-          backgroundColor: "#FAF8F3",
-          backgroundImage:
-            "radial-gradient(70% 40% at 50% 0%, rgba(232,213,188,0.35), transparent 75%), linear-gradient(180deg, #FBFAF7 0%, #F8F5EE 100%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 opacity-[0.07] mix-blend-multiply"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.30 0 0 0 0 0.25 0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-        }}
-      />
-
-      {/* ───────────── HEADER ───────────── */}
-      <header
-        className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-500 ${
-          scrolled || mobileMenu
-            ? "border-[#1D4D3F]/[0.07] bg-[#FBFAF7]/85 backdrop-blur-xl"
-            : "border-transparent bg-transparent"
-        }`}
-      >
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 md:px-8">
-          <Logo />
-          <nav className="hidden items-center gap-9 text-[13px] text-[#1D4D3F]/60 md:flex">
-            {navLinks.map(([label, href]) => (
-              <a key={href} href={href} className="transition hover:text-[#1D4D3F]">
-                {label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2">
-            <a
-              href="#contact"
-              className="hidden rounded-full bg-[#1D4D3F] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#14382E] sm:block"
-            >
-              سفارش و رزرو
-            </a>
-            <button
-              onClick={() => setMobileMenu(!mobileMenu)}
-              aria-label="باز کردن منو"
-              className="flex h-10 w-10 items-center justify-center rounded-full text-[#1D4D3F] md:hidden"
-            >
-              {mobileMenu ? <X size={20} /> : <MenuIcon size={20} />}
-            </button>
-          </div>
-        </div>
-
-        <AnimatePresence>
-          {mobileMenu && (
-            <motion.nav
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden md:hidden"
-            >
-              <div className="flex flex-col px-6 pb-3 text-sm">
-                {navLinks.map(([label, href]) => (
-                  <a
-                    key={href}
-                    href={href}
-                    onClick={() => setMobileMenu(false)}
-                    className="border-b border-[#1D4D3F]/[0.06] py-4 text-[#1D4D3F]/70 last:border-0"
-                  >
-                    {label}
-                  </a>
-                ))}
-              </div>
-            </motion.nav>
-          )}
-        </AnimatePresence>
-      </header>
-
-      {/* ───────────── HERO ───────────── */}
-      <section className="px-5 pb-20 pt-32 text-center md:px-8 md:pb-24 md:pt-40">
-        <div className="mx-auto max-w-6xl">
-          <motion.p {...heroIn(0)} className="font-brand text-sm italic text-[#A07840]">
-            Afroumarket Café
-          </motion.p>
-          <motion.h1
-            {...heroIn(0.1)}
-            className="mt-6 text-5xl font-light leading-[1.3] text-[#1D4D3F] md:text-8xl"
-          >
-            طعم لحظه‌های
-            <br />
-            ماندگار
-          </motion.h1>
-          <motion.p
-            {...heroIn(0.2)}
-            className="mx-auto mt-7 max-w-sm text-sm leading-9 text-[#1D4D3F]/55 md:text-base"
-          >
-            جایی برای مکث کردن و لذت بردن؛ از عطر قهوه تازه تا طعم دسرهای دست‌ساز.
-          </motion.p>
-          <motion.div {...heroIn(0.3)} className="mt-9 flex items-center justify-center gap-7">
-            <button
-              onClick={scrollToMenu}
-              className="group flex items-center gap-3 rounded-full bg-[#1D4D3F] px-8 py-4 text-sm font-bold text-white transition hover:bg-[#14382E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CD9E6A]"
-            >
-              مشاهده منو
-              <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
-            </button>
-            <a
-              href="#about"
-              className="border-b border-[#CD9E6A] pb-1 text-sm text-[#1D4D3F]/70 transition hover:text-[#1D4D3F]"
-            >
-              داستان ما
-            </a>
-          </motion.div>
-
-          {/* three arches */}
-          <div className="mt-16 md:mt-24">
-            <div className="flex items-end justify-center gap-4 md:gap-8">
-              {heroArches.map((arch) => (
-                <motion.div
-                  key={arch.alt}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 70 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1.2, delay: arch.delay, ease: EASE }}
-                  className={`relative ${arch.size}`}
-                >
-                  <div className="h-full w-full overflow-hidden rounded-t-[999px] rounded-b-[20px] bg-[#EDE7DE]">
-                    <img src={arch.src} alt={arch.alt} className="h-full w-full object-cover" />
-                  </div>
-                  <div className="pointer-events-none absolute -inset-2 rounded-t-[999px] rounded-b-[26px] border border-[#CD9E6A]/40" />
-                </motion.div>
-              ))}
-            </div>
-            <div className="mx-auto mt-4 h-px w-full max-w-4xl bg-gradient-to-r from-transparent via-[#CD9E6A]/60 to-transparent" />
-          </div>
-        </div>
-      </section>
-
-      {/* ───────────── SPECIAL OFFER (slider) ───────────── */}
-      <SpecialOffer onSeeInMenu={goTo} />
-
-      {/* ───────────── MENU ───────────── */}
-      <section id="menu" className="px-5 pb-28 pt-20 md:px-8 md:pb-40 md:pt-28">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-10 text-center">
-            <ArchMark className="mx-auto mb-6" />
-            <h2 className="text-5xl font-light text-[#1D4D3F] md:text-7xl">منوی کافه</h2>
-            <p className="mx-auto mt-5 max-w-sm text-sm leading-8 text-[#1D4D3F]/50">
-              از قهوه‌های خوش‌عطر تا دسرهای دست‌ساز؛ انتخابی برای هر سلیقه.
-            </p>
-          </div>
-
-          {/* sticky dock */}
-          <div className="sticky top-[76px] z-40 mb-14 flex justify-center">
-            <div className="max-w-full overflow-x-auto rounded-full bg-[#1D4D3F] p-1.5 shadow-[0_16px_38px_-14px_rgba(29,77,63,0.6)] ring-1 ring-[#CD9E6A]/30 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="flex items-center gap-1">
-                {sections.map((c) => (
-                  <button
-                    key={c.id}
-                    ref={(el) => {
-                      tabRefs.current[c.id] = el;
-                    }}
-                    onClick={() => goTo(c.id)}
-                    className={`relative isolate shrink-0 rounded-full px-6 py-2.5 text-[13px] transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#CD9E6A] ${
-                      activeCat === c.id ? "font-bold text-[#1D4D3F]" : "text-white/70 hover:text-white"
-                    }`}
-                  >
-                    {activeCat === c.id && (
-                      <motion.span
-                        layoutId="dockPill"
-                        className="absolute inset-0 -z-10 rounded-full bg-[#F5F2ED]"
-                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                      />
-                    )}
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* chapters */}
-          {sections.map((c) => {
-            const list = byCategory[c.id] ?? [];
-            return (
-              <div key={c.id} id={`cat-${c.id}`} data-cat={c.id} className="scroll-mt-8 pb-24 last:pb-0">
-                <div className="mb-12 flex items-end justify-between gap-6 border-b border-[#E8D5BC] pb-7">
-                  <div>
-                    <p className="font-brand text-lg italic text-[#A07840]">{chapterLatin[c.id]}</p>
-                    <h3 className="mt-1 text-5xl font-light text-[#1D4D3F] md:text-7xl">{c.label}</h3>
-                    <p className="mt-4 text-sm text-[#1D4D3F]/50">{chapterNote[c.id]}</p>
-                  </div>
-                  <span className="shrink-0 pb-1 text-xs text-[#A07840]">{fa(list.length)} مورد</span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-x-8 gap-y-12 px-2 md:grid-cols-2 lg:grid-cols-3">
-                  {list.map((item) => (
-                    <MenuCard key={item.id} item={item} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-
-          <p className="mt-16 text-center text-[11px] text-[#1D4D3F]/35">
-            قیمت‌ها به تومان هستند و ممکن است با تغییر فصل به‌روزرسانی شوند.
-          </p>
-        </div>
-      </section>
-
-      {/* ───────────── BLEND ───────────── */}
-      <div className="pb-28 md:pb-40">
-        <CoffeeBlendSelector />
-      </div>
-
-      {/* ───────────── ABOUT ───────────── */}
-      <section id="about" className="px-5 pb-28 md:px-8 md:pb-40">
-        <div className="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-2 lg:gap-24">
-          <div className="relative mx-auto w-full max-w-sm lg:max-w-md">
-            <div className="aspect-[3/4] overflow-hidden rounded-t-[999px] rounded-b-[36px] bg-[#F5F2ED]">
-              <img
-                src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=900&q=85"
-                alt="Cafe interior"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="pointer-events-none absolute -inset-2 rounded-t-[999px] rounded-b-[44px] border border-[#CD9E6A]/35" />
-            <img
-              src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=500&q=85"
-              alt="Coffee preparation"
-              className="absolute -bottom-8 -left-5 h-44 w-32 rounded-t-[999px] rounded-b-[20px] border-[6px] border-[#FBFAF7] object-cover md:-left-10 md:h-56 md:w-40"
+        {/* ═══════════════ BOTTOM NAV ═══════════════ */}
+        <nav className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-20px)] max-w-[540px] -translate-x-1/2 rounded-[24px] border border-[#e6dccb]/60 bg-[#fbf8f2]/94 px-5 pb-[max(env(safe-area-inset-bottom),10px)] pt-2.5 shadow-[0_16px_50px_rgba(26,58,47,0.14)] backdrop-blur-2xl">
+          <div className="flex items-center justify-around">
+            <NavButton
+              active={tab === "menu"}
+              label="منو"
+              icon={<Utensils size={19} strokeWidth={1.6} />}
+              onClick={() => changeTab("menu")}
+            />
+            <NavButton
+              active={tab === "saved"}
+              label="علاقه‌مندی‌ها"
+              icon={<Bookmark size={19} strokeWidth={1.6} />}
+              count={saved.length}
+              onClick={() => changeTab("saved")}
+            />
+            <NavButton
+              active={tab === "cafe"}
+              label="درباره ما"
+              icon={<Coffee size={19} strokeWidth={1.6} />}
+              onClick={() => changeTab("cafe")}
             />
           </div>
+        </nav>
+      </div>
+    </main>
+  );
+}
 
-          <div>
-            <ArchMark className="mb-6" />
-            <h2 className="text-4xl font-light leading-[1.4] text-[#1D4D3F] md:text-6xl">
-              بیشتر از یک کافه،
-              <br />
-              یک حس خوب
-            </h2>
-            <p className="mt-8 max-w-md text-sm leading-9 text-[#1D4D3F]/55">
-              افرومارکت جایی است برای طعم‌های دوست‌داشتنی، دیدارهای صمیمی و لحظه‌هایی که
-              دوست داریم کمی طولانی‌تر شوند. ما به کیفیت مواد اولیه، تازگی و جزئیات اهمیت
-              می‌دهیم.
-            </p>
-          </div>
-        </div>
-      </section>
+/* ═══════════════ MENU CARD ═══════════════ */
 
-      {/* ───────────── CONTACT (a doorway) ───────────── */}
-      <section id="contact" className="px-5 pb-28 md:px-8 md:pb-36">
-        <div className="relative mx-auto max-w-xl overflow-hidden rounded-t-[999px] rounded-b-[44px] bg-[#1D4D3F] px-7 pb-16 pt-44 text-center md:px-14 md:pt-56">
-          <div className="pointer-events-none absolute inset-3 rounded-t-[999px] rounded-b-[34px] border border-[#CD9E6A]/30" />
-          <div className="pointer-events-none absolute -top-20 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#CD9E6A]/[0.14] blur-[80px]" />
+function MenuCard({
+  item,
+  saved,
+  onToggle,
+  showCategory,
+}: {
+  item: MenuItem;
+  saved: boolean;
+  onToggle: () => void;
+  showCategory?: boolean;
+}) {
+  const [imageError, setImageError] = useState(false);
+  const imageSrc = `/images/menu/${item.id}.webp`;
 
-          <div className="relative">
-            <h2 className="text-3xl font-light leading-[1.45] text-white md:text-5xl">
-              آماده یک تجربه
-              <br />
-              خوشمزه هستید؟
-            </h2>
-            <p className="mx-auto mt-5 max-w-xs text-sm leading-8 text-white/55">
-              برای رزرو میز، سفارش یا دریافت اطلاعات بیشتر با ما در ارتباط باشید.
-            </p>
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <a
-                href="tel:02112345678"
-                className="flex items-center gap-3 rounded-full bg-[#CD9E6A] px-7 py-4 text-sm font-bold text-[#14382E] transition hover:bg-white"
-              >
-                <Phone size={16} />
-                تماس با ما
-              </a>
-              <a
-                href="https://instagram.com/"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full border border-white/25 px-7 py-4 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                اینستاگرام
-              </a>
+  return (
+    <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-[22px] border border-[#e8dfd1] bg-[#fffdf8] shadow-[0_4px_16px_rgba(26,58,47,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#c69b65]/40 hover:shadow-[0_14px_32px_rgba(26,58,47,0.1)]">
+      {/* image */}
+      <div className="relative aspect-square overflow-hidden bg-[#eee7da]">
+        {!imageError ? (
+          <img
+            src={imageSrc}
+            alt={item.title}
+            loading="lazy"
+            onError={() => setImageError(true)}
+            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#e9dfce] via-[#f5eee2] to-[#d8c7ab]">
+            <div className="flex flex-col items-center gap-2.5 text-[#a07840]/50">
+              <Coffee size={34} strokeWidth={1} />
+              <span className="text-[8px] tracking-[0.2em]">A.FOUR</span>
             </div>
           </div>
-        </div>
-      </section>
+        )}
 
-      {/* ───────────── FOOTER ───────────── */}
-      <footer className="border-t border-[#E8D5BC]/80 px-5 py-10 md:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 md:flex-row">
-          <Logo />
-          <div className="flex gap-8 text-xs text-[#1D4D3F]/55">
-            <a href="#home" className="transition hover:text-[#1D4D3F]">خانه</a>
-            <a href="#menu" className="transition hover:text-[#1D4D3F]">منو</a>
-            <a href="#about" className="transition hover:text-[#1D4D3F]">درباره ما</a>
-            <a href="#contact" className="transition hover:text-[#1D4D3F]">تماس</a>
+        {/* bottom gradient */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#142d24]/30 to-transparent" />
+
+        {/* category chip */}
+        {showCategory && (
+          <span className="absolute right-2.5 top-2.5 rounded-full border border-white/20 bg-[#1a3a2f]/65 px-2 py-0.5 text-[8px] font-medium text-white/90 backdrop-blur-md">
+            {item.category}
+          </span>
+        )}
+
+        {/* bookmark */}
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={saved ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
+          aria-pressed={saved}
+          className={`absolute left-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full border backdrop-blur-xl transition-all duration-300 active:scale-90 ${
+            saved
+              ? "border-[#d6b27f]/50 bg-[#1a3a2f] text-[#d6b27f]"
+              : "border-white/50 bg-white/80 text-[#1a3a2f] hover:bg-[#1a3a2f] hover:text-[#d6b27f]"
+          }`}
+        >
+          <Bookmark size={14} strokeWidth={1.8} fill={saved ? "currentColor" : "none"} />
+        </button>
+      </div>
+
+      {/* body */}
+      <div className="flex flex-1 flex-col p-3 sm:p-3.5">
+        <h3 className="line-clamp-1 text-[12.5px] font-bold leading-6 text-[#1a3a2f] sm:text-[13px]">
+          {item.title}
+        </h3>
+
+        <p className="mt-1 line-clamp-2 min-h-[36px] text-[9.5px] font-light leading-[1.85] text-[#828b80] sm:text-[10.5px]">
+          {item.description || "یک انتخاب خوش‌طعم از منوی A.Four"}
+        </p>
+
+        <div className="mb-2 mt-3 h-px bg-[#eae2d6]" />
+
+        <div className="mt-auto flex items-center justify-between gap-1.5">
+          <div className="min-w-0">
+            <span className="block text-[8px] text-[#9b9a8d]">قیمت</span>
+            <span className="mt-0.5 flex items-baseline gap-1 whitespace-nowrap text-[12.5px] font-bold tabular-nums text-[#98703f] sm:text-[13px]">
+              {formatPrice(item.price)}
+              <span className="text-[8px] font-normal text-[#a5a095]">تومان</span>
+            </span>
           </div>
-          <p className="text-[11px] text-[#1D4D3F]/35">Afroumarket © ۱۴۰۵</p>
-        </div>
-      </footer>
 
-      <BackToTop />
-    </main>
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-[#1a3a2f] text-[#d6b27f] transition-all duration-300 group-hover:bg-[#c69b65] group-hover:text-[#1a3a2f] group-hover:shadow-[0_6px_16px_rgba(198,155,101,0.3)]">
+            <ChevronLeft size={15} strokeWidth={2} />
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ═══════════════ EMPTY STATE ═══════════════ */
+
+function EmptyState({
+  saved,
+  onBack,
+}: {
+  saved: boolean;
+  onBack: () => void;
+}) {
+  return (
+    <div className="fade-in flex min-h-[340px] flex-col items-center justify-center rounded-[26px] border border-[#e9dfd0] bg-gradient-to-b from-white/70 to-[#f8f4ec] px-6 text-center">
+      <div className="relative grid h-18 w-18 place-items-center rounded-[22px] border border-[#c69b65]/25 bg-[#c69b65]/8 text-[#a07840]">
+        <div className="absolute inset-0 rounded-[22px] bg-[radial-gradient(circle_at_center,rgba(198,155,101,0.1),transparent_70%)]" />
+        {saved ? <Bookmark size={28} strokeWidth={1.4} /> : <Search size={28} strokeWidth={1.4} />}
+      </div>
+
+      <h3 className="mt-5 text-[15px] font-bold text-[#1a3a2f]">
+        {saved ? "هنوز انتخابی ندارید" : "موردی پیدا نشد"}
+      </h3>
+
+      <p className="mt-2 max-w-[230px] text-[10.5px] font-light leading-7 text-[#8a9289]">
+        {saved
+          ? "با انتخاب نشانک کنار هر آیتم، آن را به لیست علاقه‌مندی‌های خود اضافه کنید."
+          : "عبارت دیگری را جست‌وجو کنید یا دسته‌بندی دیگری را انتخاب کنید."}
+      </p>
+
+      {saved && (
+        <button
+          onClick={onBack}
+          className="mt-5 flex items-center gap-2 rounded-xl bg-[#1a3a2f] px-5 py-2.5 text-[11px] font-bold text-white shadow-[0_4px_14px_rgba(26,58,47,0.2)] transition hover:bg-[#0f2a22] hover:shadow-[0_6px_20px_rgba(26,58,47,0.3)]"
+        >
+          مشاهده منو
+          <ChevronLeft size={14} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════ CAFE INFO ═══════════════ */
+
+function CafeInfo() {
+  return (
+    <section className="px-5 pb-40 pt-8 sm:px-7">
+
+      {/* brand card */}
+      <div className="relative overflow-hidden rounded-[28px] bg-[#1a3a2f] px-6 py-10 text-center text-white shadow-[0_20px_60px_rgba(26,58,47,0.25)] ring-1 ring-white/8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(214,178,127,0.1),transparent_50%)]" />
+        <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full border border-[#d6b27f]/12" />
+        <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full border border-[#d6b27f]/10" />
+        <div className="pointer-events-none absolute -bottom-6 -left-4 h-24 w-24 rounded-full border border-dashed border-[#d6b27f]/8" />
+
+        <div className="relative">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[#d6b27f]/35 bg-[#d6b27f]/8 text-[#d6b27f]">
+            <Coffee size={24} strokeWidth={1.2} />
+          </div>
+
+          <div className="mt-5 font-brand text-[44px] font-semibold italic leading-none text-[#d6b27f]">
+            A.Four
+          </div>
+
+          <p className="mt-3 text-[9px] font-medium tracking-[0.28em] text-white/50">
+            FOOD MARKET
+          </p>
+
+          <div className="mx-auto mt-5 h-px w-14 bg-[#d6b27f]/40" />
+
+          <p className="mt-4 text-[12px] font-light text-white/70">
+            جایی برای همه
+          </p>
+        </div>
+      </div>
+
+      {/* info heading */}
+      <div className="mb-5 mt-8 flex items-end justify-between">
+        <h2 className="text-[18px] font-bold text-[#1a3a2f]">اطلاعات کافه</h2>
+        <span className="font-brand text-[15px] italic text-[#c69b65]/70">CONTACT</span>
+      </div>
+
+      {/* info card */}
+      <div className="overflow-hidden rounded-[22px] border border-[#e9dfd0] bg-[#fbf8f2] px-5 shadow-[0_4px_16px_rgba(26,58,47,0.03)]">
+        <InfoRow
+          icon={<MapPin size={18} strokeWidth={1.6} />}
+          label="آدرس"
+          value="زیباشهر منطقه ۲، بلوار مطهری، شقایق ۷"
+        />
+        <InfoRow
+          icon={<Clock3 size={18} strokeWidth={1.6} />}
+          label="ساعت کاری"
+          value="۱۷:۰۰ تا ۲۴:۰۰، همه روزه"
+        />
+        <InfoRow
+          icon={<Phone size={18} strokeWidth={1.6} />}
+          label="تماس با ما"
+          value="0900 285 4000"
+          ltr
+          href="tel:09002854000"
+          last
+        />
+      </div>
+
+      {/* social */}
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <a
+          href="https://instagram.com/A.fourcenter"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-center gap-2 rounded-[16px] border border-[#1a3a2f]/15 bg-[#fbf8f2] py-3.5 text-[11px] font-bold text-[#1a3a2f] transition hover:border-[#c69b65]/60 hover:bg-[#f3ece0] hover:shadow-[0_4px_14px_rgba(198,155,101,0.15)]"
+        >
+
+          اینستاگرام
+        </a>
+        <a
+          href="https://t.me/Afourcenter"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-center gap-2 rounded-[16px] bg-[#1a3a2f] py-3.5 text-[11px] font-bold text-white shadow-[0_4px_14px_rgba(26,58,47,0.2)] transition hover:bg-[#0f2a22] hover:shadow-[0_6px_20px_rgba(26,58,47,0.3)]"
+        >
+          <Send size={14} strokeWidth={1.8} />
+          تلگرام
+        </a>
+      </div>
+
+      <p className="mt-9 text-center text-[10px] font-light text-[#92958b]">
+        خوشحالیم که انتخابمان کرده‌اید.
+      </p>
+    </section>
+  );
+}
+
+/* ═══════════════ INFO ROW ═══════════════ */
+
+function InfoRow({
+  icon,
+  label,
+  value,
+  ltr,
+  href,
+  last,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  ltr?: boolean;
+  href?: string;
+  last?: boolean;
+}) {
+  const body = (
+    <>
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] border border-[#c69b65]/25 bg-[#c69b65]/8 text-[#a07840]">
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-light text-[#96978d]">
+          {label}
+        </p>
+
+        <p
+          dir={ltr ? "ltr" : undefined}
+          className={`mt-1 text-[13px] font-bold leading-7 text-[#1a3a2f] ${
+            ltr ? "text-right" : ""
+          }`}
+        >
+          {value}
+        </p>
+      </div>
+    </>
+  );
+
+  const cls = `flex items-center gap-4 py-5 ${
+    last ? "" : "border-b border-[#e9dfd0]"
+  }`;
+
+  return href ? (
+    <a href={href} className={cls}>
+      {body}
+    </a>
+  ) : (
+    <div className={cls}>{body}</div>
+  );
+}
+
+/* ═══════════════ BOTTOM NAVIGATION BUTTON ═══════════════ */
+
+function NavButton({
+  active,
+  label,
+  icon,
+  count,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  icon: ReactNode;
+  count?: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-current={active ? "page" : undefined}
+      className={`relative flex min-w-[88px] flex-col items-center justify-center gap-1.5 rounded-2xl px-2 py-1 transition-all duration-300 ${
+        active ? "text-[#1a3a2f]" : "text-[#a0a59c] hover:text-[#1a3a2f]"
+      }`}
+    >
+      <span
+        className={`relative grid h-10 w-14 place-items-center rounded-2xl transition-all duration-300 ${
+          active
+            ? "bg-[#1a3a2f] text-[#d6b27f] shadow-[0_8px_20px_rgba(26,58,47,0.22)]"
+            : "bg-transparent"
+        }`}
+      >
+        {icon}
+
+        {!!count && count > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 grid h-[17px] min-w-[17px] place-items-center rounded-full border-2 border-[#fbf8f2] bg-[#c69b65] px-1 text-[9px] font-bold text-[#1a3a2f]">
+            {fa(count)}
+          </span>
+        )}
+      </span>
+
+      <span className={`text-[10px] transition-all ${active ? "font-bold" : "font-medium"}`}>
+        {label}
+      </span>
+
+      {active && (
+        <span className="absolute -bottom-0.5 h-[2px] w-5 rounded-full bg-[#c69b65]" />
+      )}
+    </button>
   );
 }
